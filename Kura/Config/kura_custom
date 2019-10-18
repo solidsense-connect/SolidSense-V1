@@ -1,0 +1,23 @@
+#!/bin/bash
+# 
+#  generate Kura custom configuration
+#  run as sudo
+#
+echo "Stopping Kura service"....
+service kura stop
+echo "Mounting USB stick...."
+mount /dev/sda1 /mnt/usb1
+if [ ! -e /mnt/usb1/kura_config ]
+then
+	echo "No USB stick or config file -> using default"
+fi
+#
+echo "removing existing configuration"
+rm -fv /opt/eclipse/kura/user/snapshots/*
+echo "generating new snapshot 0"
+cd /opt/SolidSense/kura/config
+python gen_kura_properties.py
+cp -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml .
+echo "Restarting Kura service"
+service kura start
+umount /mnt/usb1

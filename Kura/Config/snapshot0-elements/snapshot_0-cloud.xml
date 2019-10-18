@@ -1,0 +1,10 @@
+    <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="encode.gzip" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="device.custom-name" type="String">
+                <esf:value>SolidSense</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
