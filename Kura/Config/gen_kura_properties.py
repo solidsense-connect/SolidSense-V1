@@ -14,6 +14,7 @@
 keywords= {}
 
 def gen_default_keywords() :
+    global keywords
     keywords["MQTT_SERVER"]="mqtt://vps610213.ovh.net:1883"
     keywords["KAPUA_ACCOUNT"]="SOLIDSENSE-TEST"
     keywords["KAPUA_USER"]="solidrun-internal"
@@ -27,26 +28,29 @@ def gen_default_keywords() :
 
 
 def set_keyword(keyword,value):
+    global keywords
     keywords[keyword]=value
 
 def read_keywords_file(filename):
+    global keywords
     try:
         fd=open(filename,"r")
     except IOError as err:
-        print err
+        print (err)
         return
-    print "Reading keyword file:",filename
+    print ("Reading keyword file:",filename )
     for line in fd:
         if line[0]  == '#' : continue
         eqindex=line.find("=")
         keyword=line[:eqindex]
         value=line[eqindex+1:].strip('\n')
-        print keyword,"=",value
+        print (keyword,"=",value)
         keywords[keyword]=value
 
     fd.close()
 
 def check_replace_keyword(line) :
+    global keywords
 
     stindex=line.find("##KEYWORD##")
     if stindex == -1:
@@ -55,15 +59,15 @@ def check_replace_keyword(line) :
     stindex=stindex+11
     lastindex=line.find("</esf:value>",stindex)
     if lastindex == -1 :
-        print "syntax error in input file"
-        print line
+        print ("syntax error in input file")
+        print (line )
         return line
     keyword=line [stindex:lastindex]
     try:
         value=keywords [keyword]
-        print "replacing [",keyword,"] by:",value
+        print ("replacing [",keyword,"] by:",value )
     except KeyError :
-        print "Unknown keyword:",keyword
+        print ("Unknown keyword:",keyword)
         return line
     outputline=outputline+value+line[lastindex:]
     return outputline
@@ -83,7 +87,7 @@ def gen_snapshot0(output_dir):
     try:
         fo=open(outputname,"w")
     except IOError as err:
-        print err
+        print (err)
         return
     nbline=0;
     for section in snapshot_sections :
@@ -95,7 +99,7 @@ def gen_snapshot0(output_dir):
         try:
             ft=open(filename,"r")
         except IOError as err:
-            print err
+            print (err)
             return
         for line in ft:
             if process_section[section]:
@@ -111,7 +115,7 @@ def gen_snapshot0(output_dir):
     fo.write("</esf:configurations>\n")
     fo.close()
 
-    print "generated:",outputname,"with:",nbline,"lines"
+    print ("generated:",outputname,"with:",nbline,"lines")
 
 def main():
 
@@ -147,7 +151,7 @@ def main():
     try:
         fo=open("/opt/eclipse/kura/user/kura_custom.properties","w")
     except IOError as err:
-        print err
+        print (err)
         return
 
     for line in ft:
