@@ -1,0 +1,78 @@
+# Kura configuration
+
+## configuration files
+
+Kura is using the follwing configuration files
+
+### /opt/eclipse/kura/framework/kura.properties
+Static set of properties for a particular release. This file is common accross all gateways and is only modified globally. The structure of the file may change with Kura version changes
+
+### /opt/eclipse/kura/user/kura_custom.properties
+That is in this file that we put gateway instance specific data.
+
+	kura.device.name= Hostname == Serial Number (BSXXXX) from RPMB
+	kura.partNumber= Part number (SRGXXX) from RPMB
+	kura.serialNumber= Serial Number from RPMB
+	kura.model.id= Part number (SRGXXX) from RPMB less the 2 last digits
+	kura.model.name= Part description. Ex: SRGW Indoor-Dual Core-WiFi-LTE CAT4 EU
+	kura.firmware.version= Firmware revision (identical to the one from Mender)
+	kura.bios.version= Why not setting the Kernel revision ?
+	
+### /opt/eclipse/kura/user/kuranet.conf
+This file is containing all network parameters used by Kura. There is no ppp parameters in it, but this will require some additional analysis to see if we can add default ppp parameters in it.
+
+	net.interface.eth0.config.ip4.status=netIPv4StatusEnabledWAN
+	net.interface.eth0.config.dhcpServer4.enabled=false
+	net.interface.eth0.config.nat.dst.interface=unknown
+	net.interface.eth0.config.dhcpServer4.passDns=false
+	net.interface.eth0.config.nat.enabled=false
+	net.interface.lo.config.ip4.status=netIPv4StatusEnabledLAN
+	net.interface.wlan0.config.nat.masquerade=true
+	net.interface.wlan0.config.wifi.mode=MASTER
+	net.interface.wlan0.config.dhcpServer4.passDns=true
+	net.interface.wlan0.config.dhcpServer4.enabled=true
+	net.interface.wlan0.config.ip4.status=netIPv4StatusEnabledLAN
+	net.interface.wlan0.config.wifi.infra.driver=nl80211
+	net.interface.wlan0.config.nat.enabled=true
+	net.interface.wlan0.config.nat.dst.interface=unknown
+	net.interface.wlan0.config.master.ssid= *Serial Number / Hostname*
+	
+### /opt/eclipse/kura/user/snapshots/snapshot_0.xml
+This contains the initial state of the Kura internal database. The default one is not good enough as it would require to configure manually a lot of parameters. Currently that file is generated automatically and the following parameters are set by editing xml template files.
+
+* Kapua Server URL: (mqtt://kapua.solidsense.io:1883)
+* Kapua account: default is SOLIDSENSE-TEST
+* Kapua user: default is solidrun-internal
+* Kapua password: default is $SolidSense2019$
+
+Then another set of data to configure the cellular connection. However, even apparently correct, they are not taken into account and some additional work in Kura is needed.
+
+* APN	name of the operator APN
+* APN Authentication : None/PAP/CHAP/AUTO
+* APN user name
+* APN Password
+* NETWORK Default is LTE
+
+### generation of the above files
+
+The generation process of the 3 above files is handled by the gen_kura_propertis.py Python script
+The script is also handling the translation between the modelid (part number) and the actual product description.
+
+# Other configuration
+
+Listed here the other files that needs to be updated automatically in the system, not taking into account the application specific files:
+
+* hostname
+* /etc/hosts
+* /etc/hostapd-wlan0.conf => With the same data as for Kuranet.conf + WPA passkey
+
+The configuration of the WiFi is done by the script repair_wifi
+
+
+
+
+	
+	
+
+
+
