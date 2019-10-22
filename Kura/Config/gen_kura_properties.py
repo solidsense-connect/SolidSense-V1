@@ -10,6 +10,7 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 #
+import subprocess
 
 keywords = {}
 
@@ -157,6 +158,11 @@ def main():
     for line in ft:
         fo.write(line)
     ft.close()
+    # Determine firmware version
+    MenderVersionCMD = subprocess.Popen(
+        ['/usr/bin/mender', '-show-artifact'],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    resultStdout, resultStderr = MenderVersionCMD.communicate()
     #
     #  now generate custome properties
     #
@@ -182,6 +188,9 @@ def main():
         modelName = "SolidSense unknown configuration"
     fo.write("kura.model.name=")
     fo.write(modelName)
+    fo.write('\n')
+    fo.write("kura.firmware.version=%")
+    fo.write(str(resultStdout, 'utf-8'))
     fo.write('\n')
     fo.write("################\n")
     fo.write('\n')
