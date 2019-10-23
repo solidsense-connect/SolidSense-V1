@@ -9,9 +9,10 @@ Here are the fields and length to be used in the RPMB memory and set in factory.
 The RPMB is only written in factory in the current version
 
 ## Fields
-1. Serial Number: offset= X, length=Y
-2. Partnumber: offset= , length=
-3. Sink configuration (see below)
+1. Partnumber: offset= 0x05, length= 10
+2. Serial Number: offset= 0x17, length=11
+3. product_code: offset= 0x23, length=7
+4. Sink configuration (see below)
 
 C like definition
 
