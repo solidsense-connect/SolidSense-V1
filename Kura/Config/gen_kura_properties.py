@@ -16,7 +16,7 @@ keywords = {}
 
 def gen_default_keywords():
     global keywords
-    keywords["MQTT_SERVER"] = "mqtt://vps610213.ovh.net:1883"
+    keywords["MQTT_SERVER"] = "mqtt://kapua.solidsense.io:1883"
     keywords["KAPUA_ACCOUNT"] = "SOLIDSENSE-TEST"
     keywords["KAPUA_USER"] = "solidrun-internal"
     keywords["KAPUA_PASSWD"] = "$SolidSense2019$"
@@ -120,10 +120,20 @@ def gen_snapshot0(output_dir):
 
 def main():
 
-    models = {'ASG0002': "SRGW Indoor-Dual Core-WiFi-LTE CAT4 EU",
-              'ASG0001': "SRGW Indoor-Dual Core-WiFi",
-              'ASG0003': "SRGW Indoor-Quad Core-WiFi-LTE CAT4 EU",
-              'ASG0006': "SRGW Indoor-Dual Core-WiFi-LTE CAT 4 EU"}
+    models = {'ASG0002': "ASGW Indoor-Dual Core-WiFi-LTE CAT4 EU",
+              'ASG0001': "ASGW Indoor-Dual Core-WiFi",
+              'ASG0003': "ASGW Indoor-Quad Core-WiFi-LTE CAT4 EU",
+              'ASG0006': "ASGW Indoor-Dual Core-WiFi-LTE CAT4 AU",
+              'SRG0001': "SolidSense N6 Edge Gateway Indoor - Dual Core-WiFi - Industrial",
+              'SRG0002': "SolidSense N6 Edge Gateway Indoor - Dual Core-WiFi-LTE C4 EU - Industrial",
+              'SRG0003': "SolidSense N6 Edge Gateway Indoor - Quad Core-WiFi -LTE C4 EU - Industrial",
+              'SRG0004': "SolidSense N6 Edge Gateway Indoor - Dual Core-WiFi-LTE C4 US - Industrial",
+              'SRG0005': "SolidSense N6 Edge Gateway Indoor - Single Core-WiFi-LTE C4 EU - Industrial",
+              'SRG0006': "SolidSense N6 Edge Gateway Indoor - Dual Core-WiFi-LTE C4 AU - Industrial",
+              'SRG0007': "SolidSense N6 Edge Gateway Indoor - Quad Core-WiFi-LTE C4 US - Industrial",
+              'SRG0102': "SolidSense N6 Edge Gateway Outdoor - Dual Core-WiFi-LTE C4 EU - Industrial",
+              'SRG0107': "SolidSense N6 EDGE Gateway Outdoor - Dual Core-WiFi-LTE C4 AU - Industrial"
+            }
 
     gen_default_keywords()
     #
