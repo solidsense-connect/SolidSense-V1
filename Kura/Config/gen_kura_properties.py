@@ -199,7 +199,7 @@ def main():
     fo.write("kura.model.name=")
     fo.write(modelName)
     fo.write('\n')
-    fo.write("kura.firmware.version=%")
+    fo.write("kura.firmware.version=")
     fo.write(str(resultStdout, 'utf-8'))
     fo.write('\n')
     fo.write("################\n")
