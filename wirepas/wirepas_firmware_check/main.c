@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
 		e = WPC_initialize(ttydev, 125000);
 		if(e != APP_RES_OK) {
 			fprintf(stderr, "Error: WPC_initialize(\"%s\") returned %i!\n", ttydev, e);
+			// shut down (kills this thread!)
+			WPC_close();
 			return e;
 		}
 
@@ -51,6 +53,8 @@ int main(int argc, char *argv[]) {
 		e = WPC_get_firmware_version(version);
 		if(e != APP_RES_OK) {
 			fprintf(stderr, "Error: WPC_get_firmware_version((0x%x) returned %i!\n", version, e);
+			// shut down (kills this thread!)
+			WPC_close();
 			return e;
 		}
 
