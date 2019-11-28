@@ -1,0 +1,22 @@
+ <esf:configuration pid="com.solidsense.kura.WirepasSinkConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="sinkAddress" type="Integer">
+                <esf:value>##KEYWORD##WP-SINK1-ADDRESS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="networkChannel" type="Integer">
+                <esf:value>##KEYWORD##WP-SINK1-NETWORK_CHANNEL</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="networkAddress" type="Integer">
+                <esf:value>##KEYWORD##WP-SINK1-NETWORK_ID</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="sinkName" type="String">
+                <esf:value>sink1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
+            </esf:property>
+        </esf:properties>
+ </esf:configuration>

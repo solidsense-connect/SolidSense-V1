@@ -19,10 +19,10 @@
                 <esf:value>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="broker-url" type="String">
-                <esf:value>##KEYWORD##MQTT_SERVER</esf:value>
+                <esf:value>##KEYWORD##MQTT_BROKER</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="password" type="Password">
-                <esf:value>##KEYWORD##KAPUA_PASSWD</esf:value>
+                <esf:value>##KEYWORD##KAPUA_PASSWORD</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="keep-alive" type="Integer">
                 <esf:value>30</esf:value>

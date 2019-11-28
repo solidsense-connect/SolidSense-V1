@@ -1,0 +1,58 @@
+ <esf:configuration pid="com.solidsense.kura.WirepasConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="transportA.enabled" type="Boolean">
+                <esf:value>##KEYWORD##WP-TA-ENABLE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.port" type="Integer">
+                <esf:value>##KEYWORD##WP-TA-PORT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.address" type="String">
+                <esf:value>##KEYWORD##WP-TB-ADDRESS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.secured" type="Boolean">
+                <esf:value>##KEYWORD##WP-TB-SECURE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.user" type="String">
+                ##KEYWORD##WP-TB-USER</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="customID" type="String">
+                ##KEYWORD##WP-CUSTOM-ID</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.address" type="String">
+                <esf:value>##KEYWORD##WP-TA-ADDRESS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="microService.enabled" type="Boolean">
+                <esf:value>##KEYWORD##WP-MS-ENABLE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.user" type="String">
+                <esf:value>##KEYWORD##WP-TA-USER</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.passwd" type="String">
+                ##KEYWORD##WP-TB-PASSWORD</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.secured" type="Boolean">
+                <esf:value>##KEYWORD##WP-TA-SECURE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.passwd" type="String">
+                <esf:value>##KEYWORD##WP-TA-PASSWORD</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.enabled" type="Boolean">
+                <esf:value>##KEYWORD##WP-TB-ENABLE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="gatewayID" type="String">
+                <esf:value>device</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="microService.global" type="Boolean">
+                <esf:value>##KEYWORD##WP-MS-GLOBAL</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.port" type="Integer">
+                <esf:value>##KEYWORD##WP-TB-PORT</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
