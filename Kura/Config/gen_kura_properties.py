@@ -17,8 +17,8 @@ keywords = {}
 def gen_default_keywords():
     global keywords
     keywords["MQTT_SERVER"] = "mqtt://kapua.solidsense.io:1883"
-    keywords["KAPUA_ACCOUNT"] = "SOLIDSENSE-TEST"
-    keywords["KAPUA_USER"] = "solidrun-internal"
+    keywords["KAPUA_ACCOUNT"] = "SOLIDSENSE-NURSERY"
+    keywords["KAPUA_USER"] = "newborn-gw"
     keywords["KAPUA_PASSWD"] = "$SolidSense2019$"
     keywords["APN"] = "operator"
     keywords["APN_USER"] = "operator"
