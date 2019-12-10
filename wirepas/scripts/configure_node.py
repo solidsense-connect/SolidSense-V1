@@ -3,10 +3,13 @@
 # See file LICENSE.txt for full license details.
 #
 import argparse
+import logging
+import sys
 
 from wirepas_gateway.dbus.dbus_client import BusClient
 
-
+root_logger = logging.basicConfig(stream=sys.stdout,level=logging.INFO)
+local_log=logging.getLogger("Wirepas-Sink-Configuration")
 
 class SinkConfigurator(BusClient):
     """
@@ -19,9 +22,11 @@ class SinkConfigurator(BusClient):
     def configure(self, sink_name, node_address, node_role, network_address, network_channel, start):
         sink = self.sink_manager.get_sink(sink_name)
         if sink is None:
-            print("Cannot retrieve sink object")
+            local_log.error("Cannot retrieve sink object:"+sink_name)
             return
 
+        fmt="Wirepas sink configuration for sink:%s address:%d role:%d network:%d (%06X) channel:%d start:%s"
+        local_log.info(fmt%(sink_name,node_address,node_role,network_address,network_address,network_channel,start))
         # Do the actual configuration
         config = {}
         if node_address is not None:
@@ -35,8 +40,9 @@ class SinkConfigurator(BusClient):
         if start is not None:
             config["started"] = start
 
+
         ret = sink.write_config(config)
-        print("Configuration done with result = {}".format(ret))
+        local_log.info("Configuration done with result = {}".format(ret))
 
 
 def main(log_name='configure_node'):
