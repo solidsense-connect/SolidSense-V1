@@ -6,7 +6,7 @@ Requires=network.target
 Type=simple
 User=solidsense
 ExecStart=/usr/bin/python3 /opt/SolidSense/wirepas/grpc/grpc_service.py --settings=/data/solidsense/wirepas/wirepasMicro.service.cfg
-Restart=always
+Restart=on-abnormal
 RestartSec=6
 
 [Install]
