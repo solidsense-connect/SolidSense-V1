@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
-    <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
+
+	<esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
                 <esf:value>22,tcp,,,,,,#;80,tcp,,eth0,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,wlan0,,,,#</esf:value>
@@ -12,7 +13,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
+	<esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="net.interface.lo.mac" type="String">
                 <esf:value>00:00:00:00:00:00</esf:value>
@@ -125,7 +126,7 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.dhcpServer4.maxLeaseTime" type="Integer">
                 <esf:value>7200</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="true" name="net.interface.wlan0.config.wifi.infra.passphrase" type="Password">
+            <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.wifi.infra.passphrase" type="Password">
                 <esf:value>d2VwS2V5SW5mcmFXbGFuMA==</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.ip4.prefix" type="Short">
@@ -213,7 +214,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.wifi.master.ssid" type="String">
-                <esf:value>kura_gateway_B8:27:EB:2B:4E:35</esf:value>
+                <esf:value>SolidSense-Default</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.ip4.dnsServers" type="String">
                 <esf:value/>
@@ -337,7 +338,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
+	<esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="pingInterval" type="Integer">
                 <esf:value>10000</esf:value>
@@ -350,7 +351,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.clock.ClockService">
+	<esf:configuration pid="org.eclipse.kura.clock.ClockService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="clock.ntp.host" type="String">
                 <esf:value>0.pool.ntp.org</esf:value>
@@ -378,7 +379,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.db.H2DbService">
+	<esf:configuration pid="org.eclipse.kura.db.H2DbService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="db.user" type="String">
                 <esf:value>SA</esf:value>
@@ -400,7 +401,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+	<esf:configuration pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="in-flight.persistence" type="String">
                 <esf:value>memory</esf:value>
@@ -421,16 +422,16 @@
                 <esf:value>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="broker-url" type="String">
-                <esf:value>mqtt://broker-url:1883/</esf:value>
+                <esf:value>mqtt://kapua.solidsense.io:1883</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="true" name="password" type="Password">
-                <esf:value>cGFzc3dvcmQ=</esf:value>
+            <esf:property array="false" encrypted="false" name="password" type="Password">
+                <esf:value>$SolidSense2019$</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="keep-alive" type="Integer">
                 <esf:value>30</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="topic.context.account-name" type="String">
-                <esf:value>account-name</esf:value>
+                <esf:value>SOLIDSENSE-TEST</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="lwt.topic" type="String">
                 <esf:value>$EDC/#account-name/#client-id/MQTT/LWT</esf:value>
@@ -439,17 +440,22 @@
                 <esf:value>0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="username" type="String">
-                <esf:value>username</esf:value>
+                <esf:value>solidsense-internal</esf:value>
+            </esf:property>
+			<esf:property array="false" encrypted="false" name="client-id" type="String">
+                <esf:value>BS184300123</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.data.DataService">
+
+    
+	<esf:configuration pid="org.eclipse.kura.data.DataService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="store.purge-age" type="Integer">
                 <esf:value>60</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="connect.auto-on-startup" type="Boolean">
-                <esf:value>false</esf:value>
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="in-flight-messages.congestion-timeout" type="Integer">
                 <esf:value>0</esf:value>
@@ -477,38 +483,39 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.position.PositionService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="baudRate" type="Integer">
-                <esf:value>115200</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="bitsPerWord" type="Integer">
-                <esf:value>8</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="port" type="String">
-                <esf:value>1-3.2</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="stopBits" type="Integer">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="parity" type="Integer">
-                <esf:value>0</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.position.PositionService</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
+
+	<esf:configuration pid="org.eclipse.kura.position.PositionService">
+		<esf:properties>
+			<esf:property array="false" encrypted="false" name="baudRate" type="Integer">
+				<esf:value>115200</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="bitsPerWord" type="Integer">
+				<esf:value>8</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="port" type="String">
+				<esf:value>1-3.2</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="stopBits" type="Integer">
+				<esf:value>1</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="parity" type="Integer">
+				<esf:value>0</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="enabled" type="Boolean">
+				<esf:value>false</esf:value>
+			</esf:property>
+			<esf:property array="false" encrypted="false" name="service.pid" type="String">
+				<esf:value>org.eclipse.kura.position.PositionService</esf:value>
+			</esf:property>
+		</esf:properties>
+	</esf:configuration>
     <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="encode.gzip" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="device.custom-name" type="String">
-                <esf:value>Raspberry Pi 2</esf:value>
+                <esf:value>SolidSense</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
@@ -522,6 +529,86 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="ssl.hostname.verification" type="Boolean">
                 <esf:value>true</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+ <esf:configuration pid="com.solidsense.kura.WirepasSinkConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="sinkAddress" type="Integer">
+                <esf:value>2</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="networkChannel" type="Integer">
+                <esf:value>10</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="networkAddress" type="Integer">
+                <esf:value>10450204</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="sinkName" type="String">
+                <esf:value>sink1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
+            </esf:property>
+        </esf:properties>
+ </esf:configuration>
+ <esf:configuration pid="com.solidsense.kura.WirepasConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="transportA.enabled" type="Boolean">
+                <esf:value>True</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.port" type="Integer">
+                <esf:value>8883</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.address" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.secured" type="Boolean">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.user" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="customID" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.address" type="String">
+                <esf:value>solidrunwpewnt.extwirepas.com</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="microService.enabled" type="Boolean">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.user" type="String">
+                <esf:value>mosquittouser</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.passwd" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.secured" type="Boolean">
+                <esf:value>True</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportA.passwd" type="String">
+                <esf:value>peWVOA8qisIvBQYt6LkVJKCusVJl</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.enabled" type="Boolean">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="gatewayID" type="String">
+                <esf:value>device</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="microService.global" type="Boolean">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transportB.port" type="Integer">
+                <esf:value></esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

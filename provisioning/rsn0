@@ -1,0 +1,8 @@
+#!/bin/bash
+# wipe out and replace snapshot_0
+#
+systemctl stop kura
+rm /opt/eclipse/kura/user/snapshots/*
+cp $1 /opt/eclipse/kura/user/snapshots/snapshot_0.xml
+systemctl start kura
+

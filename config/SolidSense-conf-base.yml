@@ -1,0 +1,82 @@
+#
+#  Base file for SolidSense provisioning V0.91
+#
+#  Copyright Sterwen-Technology/SolidRun 2019
+#
+# Global variable definition
+gateway:
+    gateway-id: $SERIAL-NUMBER
+    snapshot_0: snapshot_0.xml
+    mode: test 
+#
+#
+#  Services definition
+#
+services:
+
+- service:
+    type: KuraService
+    name: KapuaMQTT
+    parameters:
+        configuration: MqttDataTransport
+    properties:
+        broker-url: mqtt://kapua.solidsense.io:1883
+        topic.context.account-name: SOLIDSENSE-DEBUG
+        username: solidsense
+        password: ABCD
+        
+- service:
+    type: KuraService
+    name: Clock
+    parameters:
+        configuration: ClockService
+    properties:
+        enabled: true
+
+- service:
+    type: NetworkService
+    name: lo
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    properties:
+        config.ip4.status: netIPv4StatusEnabledLAN
+        config.state: ACTIVATED
+        
+- service:
+    type: EthernetService
+    name: eth0
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    variable:
+    properties:
+        config.ip4.status: netIPv4StatusEnabledWAN
+        config.autoconnect: true
+        
+- service:
+    type: WiFiService
+    name: wlan0
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    variables:
+        WPA_KEYMGMT: WPA-PSK
+        WIFI_PASSWORD: testKEYS
+        WPA_LEVEL: 2
+        WPA_PAIRWISE: CCMP
+        WIFI_MODE: n
+        WIFI_CHANNEL: 5
+        WLAN-INTERFACE: $service_name
+    properties:
+        config.ip4.status: netIPv4StatusEnabledLAN
+        config.wifi.master.mode: MASTER
+        config.dhcpServer4.passDns: true
+        config.wifi.master.securityType: SECURITY_WPA2
+        config.wifi.master.ssid: $SERIAL-NUMBER
+        config.wifi.infra.passphrase: $WIFI_PASSWORD
+        config.wifi.master.pairwiseCiphers: $WPA_PAIRWISE
+        config.wifi.master.radioMode: RADIO_MODE_80211$WIFI_MODE
+        config.ip4.address: 172.16.1.1
+        config.dhcpServer4.rangeStart: 172.16.1.100
+        config.dhcpServer4.rangeEnd: 172.16.1.115
