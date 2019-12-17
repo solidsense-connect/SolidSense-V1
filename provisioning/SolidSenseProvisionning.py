@@ -34,14 +34,14 @@ class GlobalKuraConfig:
     snapshot_0.xml
     kura_custom.properties
     kuranet.conf
-    '''
+
     snapshot_sections = ["header", "firewall", "net", "watchdog", "clock",
                          "H2Db", "mqtt", "data", "position", "cloud", "ssl"]
     process_section = {
         "header": False, "firewall": False, "net": True, "watchdog": False,
         "clock": False, "H2Db": False, "mqtt": True, "data":False,
         "position": False, "cloud": False, "ssl": False}
-
+    '''
 
     def __init__(self,template_dir,config_dir):
         self._variables={}
@@ -197,7 +197,7 @@ class GlobalKuraConfig:
             return target
 
     def gen_snapshot0(self):
-        outdir=self.output_dir('/opt/kura/eclipse/user/snapshots')
+        outdir=self.output_dir('/opt/eclipse/kura/user/snapshots')
         filename=os.path.join(outdir,"snapshot_0.xml")
         servlog.info("Generating snapshot 0:"+filename)
         self._snapshot.write(filename)
@@ -436,8 +436,13 @@ def read_service_def(kgc_o,serv_file):
 def main():
     # template_dir='C:\\Users\\laure\\Sterwen-Tech\\Git-SolidRun\\SolidSense-V1\\template'
     # config_dir='C:\\Users\\laure\\Sterwen-Tech\\Git-SolidRun\\SolidSense-V1\\config'
-    config_dir='X:\Sterwen-Tech-SW\SolidSense-V1\config'
-    template_dir='X:\Sterwen-Tech-SW\SolidSense-V1\\template'
+    if isWindows():
+        config_dir='X:\Sterwen-Tech-SW\SolidSense-V1\config'
+        template_dir='X:\Sterwen-Tech-SW\SolidSense-V1\\template'
+    else:
+        config_dir='/opt/SolidSense/config'
+        template_dir='/opt/SolidSense/template'
+
     global servlog
     #template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
     # config_dir= '/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/config'
@@ -461,6 +466,7 @@ def main():
         custom_dir='..\\custom'
     else:
         custom_dir='/data/solidsense/config'
+        checkCreateDir(custom_dir)
     custom_file = 'SolidSense-conf-custom.yml'
     cust_file=os.path.join(custom_dir,custom_file)
     servlog.info("REading custom configuration file:"+cust_file)

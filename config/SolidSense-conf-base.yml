@@ -5,9 +5,9 @@
 #
 # Global variable definition
 gateway:
-    gateway-id: $SERIAL-NUMBER
+    # gateway-id: $SERIAL-NUMBER
     snapshot_0: snapshot_0.xml
-    mode: test 
+    mode: normal 
 #
 #
 #  Services definition
@@ -49,7 +49,7 @@ services:
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
-    variable:
+    variables:
     properties:
         config.ip4.status: netIPv4StatusEnabledWAN
         config.autoconnect: true

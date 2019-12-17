@@ -64,7 +64,7 @@ class SnapshotFile:
         try:
             fd=open(filename,'w')
         except IOError as err:
-            loclog.error("cannot open:"+filename+" "+err)
+            loclog.error("cannot open:"+filename+" "+str(err))
             return
         for c in self._configurations.values():
             c.write_simple(fd)
