@@ -247,7 +247,7 @@ class WirepasTransport(KuraService):
         else:
             self._snapconf.set_property('customID','None')
             self._snapconf.set_property('gatewayID','device')
-            self._gwid=self.variableValue('SERIAL_NUMBER')
+            self._gwid=self.variableValue('SERIAL-NUMBER')
 
 
         # print('gateway ID=',self._gwid)

@@ -56,7 +56,7 @@ class SnapshotFile:
 
     def write(self,filename) :
         try:
-            self._tree.write(filename,encoding="UTF-8",xml_declaration=True)
+            self._tree.write(filename,encoding="UTF-8",xml_declaration=True,short_empty_elements=False)
         except IOError as err:
             print(err)
 
@@ -119,6 +119,7 @@ class SnapshotConfiguration:
         p=SnapshotProperty()
         p.newProperty(self._properties_xml,name,value)
         self._properties[p.name()]=p
+        loclog.info(' Configuration:'+self._name+" property added:"+name)
 
 
     def write_simple(self,fd):

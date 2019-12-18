@@ -233,7 +233,7 @@ class GlobalKuraConfig:
         tmpl=self.template("kura","kura_custom.properties.tmpl")
         outdir=self.output_dir("/opt/eclipse/kura/user")
         out= os.path.join(outdir,"kura_custom.properties")
-        servlog.info("Generating Kura custome properties:"+out)
+        servlog.info("Generating Kura custom properties:"+out)
         self.genconfigfile(self,tmpl,out)
 
     def gen_netconf(self):

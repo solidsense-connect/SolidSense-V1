@@ -3,9 +3,25 @@
 #
 #  Copyright Sterwen-Technology/SolidRun 2019
 #
+#   that file provide the basic minimum configuration for Kura and all SolidSense services
+#   It shall be located in /opt/SolidSense/config and named SolidSense-conf-base.yml
+#
+#   The customer specific configuration is located in /data/solidsense/config/SolidSense-conf-custom.yml
+#   The combination of both files will be applied to the gateway
+#
+#   mini language
+#
 # Global variable definition
 gateway:
+    # if the gateway-id is set it will be used as is for all transport service
     # gateway-id: $SERIAL-NUMBER
+    # here are all the default variable that are created implicitely
+    # SERIAL-NUMBER     serial number of the gateway
+    # PART-NUM          full part number including variant
+    # MODEL-ID          product code
+    # MODEL-NAME        Description of hardware configuration
+    # FIRMWARE          Actual firmware running
+    
     snapshot_0: snapshot_0.xml
     mode: normal 
 #
@@ -15,17 +31,28 @@ gateway:
 services:
 
 - service:
+    # MQTT connection to Kapua
     type: KuraService
     name: KapuaMQTT
     parameters:
         configuration: MqttDataTransport
     properties:
         broker-url: mqtt://kapua.solidsense.io:1883
-        topic.context.account-name: SOLIDSENSE-DEBUG
-        username: solidsense
-        password: ABCD
+        topic.context.account-name: SOLIDSENSE-NURSERY
+        username: newborn-gw
+        password: ^$SolidSense2019$
         
 - service:
+    # Data service (MQTT) parameters
+    type: KuraService
+    name: MqttData
+    parameters:
+        configuration: DataService
+    properties:
+        connect.auto-on-startup: true
+        
+- service:
+    # NTP connection
     type: KuraService
     name: Clock
     parameters:
@@ -34,6 +61,7 @@ services:
         enabled: true
 
 - service:
+    # Local loop
     type: NetworkService
     name: lo
     parameters:
@@ -43,8 +71,14 @@ services:
         config.ip4.status: netIPv4StatusEnabledLAN
         config.state: ACTIVATED
         
+#
+#  Default network configuration
+#   WAN => Eth0 / DHCP
+#   LAN => wlan0
+#
 - service:
-    type: EthernetService
+    # Ethernet port
+    type: NetworkService
     name: eth0
     parameters:
         configuration: NetworkConfigurationService
@@ -52,8 +86,14 @@ services:
     variables:
     properties:
         config.ip4.status: netIPv4StatusEnabledWAN
+        config.dhcpClient4.enabled: true
         config.autoconnect: true
         
+#
+#   WiFi configuration by default
+#   Access point
+#   HW mode=g. Higher mode not yet supported by KuraService
+#
 - service:
     type: WiFiService
     name: wlan0
@@ -65,7 +105,7 @@ services:
         WIFI_PASSWORD: testKEYS
         WPA_LEVEL: 2
         WPA_PAIRWISE: CCMP
-        WIFI_MODE: n
+        WIFI_MODE: g
         WIFI_CHANNEL: 5
         WLAN-INTERFACE: $service_name
     properties:

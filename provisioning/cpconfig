@@ -1,0 +1,5 @@
+#!/bin/bash
+# copy the configuration files in the target environement
+#
+cp ../config/* /opt/SolidSense/config
+cp -r ../template/* /opt/SolidSense/template
