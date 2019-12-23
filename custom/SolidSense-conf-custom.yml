@@ -14,6 +14,8 @@ services:
 - service:
     type: PppService
     name: ppp0
+    state: active
+    override: true
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name

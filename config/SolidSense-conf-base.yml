@@ -23,6 +23,7 @@ gateway:
     # FIRMWARE          Actual firmware running
     
     snapshot_0: snapshot_0.xml
+    # mode can be normal or test. In test mode all files are generated in /temp directory
     mode: normal 
 #
 #
@@ -34,6 +35,7 @@ services:
     # MQTT connection to Kapua
     type: KuraService
     name: KapuaMQTT
+    state: active
     parameters:
         configuration: MqttDataTransport
     properties:
@@ -80,6 +82,7 @@ services:
     # Ethernet port
     type: NetworkService
     name: eth0
+    state: active
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
@@ -97,6 +100,7 @@ services:
 - service:
     type: WiFiService
     name: wlan0
+    state: active
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
@@ -109,14 +113,34 @@ services:
         WIFI_CHANNEL: 5
         WLAN-INTERFACE: $service_name
     properties:
+        config.wifi.mode: MASTER
         config.ip4.status: netIPv4StatusEnabledLAN
         config.wifi.master.mode: MASTER
         config.dhcpServer4.passDns: true
         config.wifi.master.securityType: SECURITY_WPA2
         config.wifi.master.ssid: $SERIAL-NUMBER
-        config.wifi.infra.passphrase: $WIFI_PASSWORD
+        config.wifi.master.passphrase: $WIFI_PASSWORD
         config.wifi.master.pairwiseCiphers: $WPA_PAIRWISE
         config.wifi.master.radioMode: RADIO_MODE_80211$WIFI_MODE
         config.ip4.address: 172.16.1.1
         config.dhcpServer4.rangeStart: 172.16.1.100
         config.dhcpServer4.rangeEnd: 172.16.1.115
+        
+#
+#   Modem/GPS service
+#
+- service:
+    type: ModemGps
+    name: modem_gps
+    state: auto
+    parameters:
+        system: modem_gps
+        port: 20231
+        address: 0.0.0.0
+        modem_ctrl: /dev/ttyUSB2
+        nmea_tty: /dev/ttyUSB1
+        trace: info
+        PIN: '0000'
+        roaming: true
+        operatorsDB: 'operatorsDB'
+        start_gps: false

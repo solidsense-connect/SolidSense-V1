@@ -19,7 +19,7 @@ import platform
 import datetime
 
 from SolidSenseService import *
-from PppService import *
+from ModemPppService import *
 from provisioning_utils import *
 from SnapshotXML import *
 
@@ -46,7 +46,7 @@ class GlobalKuraConfig:
     def __init__(self,template_dir,config_dir):
         self._variables={}
         self._services={}
-        self._plugins=[]
+        self._plugins={}
         self._pppIf=False
         self._networkIf=[]
         self._template_dir=template_dir
@@ -173,9 +173,17 @@ class GlobalKuraConfig:
     def add_service(self,s_name,service):
         self._services[s_name]=service
 
-    def add_plugin(self,plugin_name,plugin_file) :
-        if plugin_file not in self._plugins :
-            self._plugins.append((plugin_name,plugin_file))
+    def get_service(self,name):
+        try:
+            s=self._services[name]
+        except KeyError:
+            servlog.error("Service: "+name+" Not found")
+            return None
+        return s
+
+    def add_plugin(self,plugin_name,plugin_file ):
+
+        self._plugins[plugin_name]=plugin_file
 
     def addPpp(self):
         self._pppIf=True
@@ -281,9 +289,9 @@ class GlobalKuraConfig:
             servlog.error(" Cannot open plugin file:"+output+" "+str(err))
             return
         write_header(fd)
-        for plugin in self._plugins :
-            filename=os.path.join(plugin_dir,plugin[1])
-            fd.write(plugin[0])
+        for plugin,plugin_file in self._plugins.items() :
+            filename=os.path.join(plugin_dir,plugin_file)
+            fd.write(plugin)
             fd.write('=file\\:')
             fd.write(filename)
             fd.write('\n')
@@ -375,6 +383,7 @@ services_class = {
     "NetworkService": NetworkService,
     "WiFiService": WiFiService,
     "EthernetService": EthernetService,
+    "ModemGps": ModemGps,
     "PppService": PppService,
     "WirepasSink": WirepasSink,
     "WirepasTransport": WirepasTransport,
@@ -428,9 +437,23 @@ def read_service_def(kgc_o,serv_file):
         except KeyError:
             servlog.error("Unknown service:"+service_class_name)
             continue
-        service=service_class(kgc_o,service_def)
-        servlog.info("adding Service:"+service_class_name+" name:"+service.name())
-        kgc_o.add_service(service_name,service)
+        override=True
+        try:
+            override=service_def['override']
+        except KeyError :
+            override=True
+        if not override :
+            service = kgc_o.get_service(service_name)
+            if service == None :
+                override = True
+            else:
+                servlog.info("combining Service:"+service_name)
+                service.combine(service_def)
+
+        if override :
+            service=service_class(kgc_o,service_def)
+            servlog.info("adding Service:"+service_class_name+" name:"+service.name())
+            kgc_o.add_service(service_name,service)
 
 
 def main():

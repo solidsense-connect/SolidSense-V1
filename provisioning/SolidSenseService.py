@@ -22,6 +22,7 @@ class SolidSenseService:
 
         self._name=def_dict.get('name','**No name**')
         self._kura_config=kura_config
+        self._state=def_dict.get('state','unknown')
         self._parameters=def_dict.get('parameters',{})
         self._variables=def_dict.get('variables')
         if self._variables == None :
@@ -34,6 +35,27 @@ class SolidSenseService:
 
     def name(self):
         return self._name
+
+    def combine(self,def_dict) :
+        '''
+        combine the existing definition with the new one
+        new variables and properties are added
+        existing values are updated
+        '''
+        try:
+            self._state=def_dict['state']
+        except KeyError:
+            pass
+        def merge_dict(dict1,dict2):
+            if dict2 == None:
+                return
+            for key,value in dict2.items():
+                dict1[key]=value
+
+        merge_dict(self._parameters,def_dict.get('variables',None))
+        merge_dict(self._variables,def_dict.get('parameters',None))
+        merge_dict(self._properties,def_dict.get('properties',None))
+
 
     def dump_variables(self):
         print("Variables for service: ",self._name)
