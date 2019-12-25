@@ -12,6 +12,7 @@
 import platform
 import os
 import subprocess
+import sys
 import datetime
 
 def isWindows():
@@ -20,7 +21,15 @@ def isWindows():
     return pl_str.startswith('Windows')
 
 def systemCtl(action, service):
-    pass
+    args=['systemctl']
+    args.append(action)
+    args.append(service)
+    print('Executing:',args)
+    c=subprocess.run(args,stderr=sys.stderr)
+    print('result:',c)
+    return c.returncode
+
+
 
 def checkCreateDir(dir) :
     if isWindows() :

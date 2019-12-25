@@ -211,7 +211,10 @@ class GlobalKuraConfig:
         self._snapshot.write(filename)
 
         # servlog.info("generated:"+ outputname+" with:"+str( nbline)+  " lines")
-
+    def dump_snapshot0(self):
+        outdir=self.output_dir('/data/solidsense/config')
+        filename=os.path.join(outdir,"snapshot_0.xml")
+        self._snapshot.write(filename)
 
     def gen_configuration(self):
         '''
@@ -233,6 +236,14 @@ class GlobalKuraConfig:
 
         self.gen_plugin()
         servlog.info("*******Ending file generation*******")
+
+    def start_services(self):
+        if not isWindows() :
+            servlog.info("*******Starting systemd services activation*******")
+            for s in self._services.values():
+                # print('starting:',s.name())
+                s.startService()
+            servlog.info("*******Ending systemd services activation*******")
 
     def gen_properties(self):
         '''
@@ -382,12 +393,13 @@ services_class = {
     "KuraService":KuraService,
     "NetworkService": NetworkService,
     "WiFiService": WiFiService,
-    "EthernetService": EthernetService,
+    #"EthernetService": EthernetService,
     "ModemGps": ModemGps,
     "PppService": PppService,
     "WirepasSink": WirepasSink,
     "WirepasTransport": WirepasTransport,
-    "WirepasMicroService": WirepasMicroService}
+    "WirepasMicroService": WirepasMicroService,
+    "BluetoothService": BluetoothService}
 
 def read_service_def(kgc_o,serv_file):
     '''
@@ -504,6 +516,9 @@ def main():
     # print(nserv.get_property('net.interface.wlan0.master.ssid'))
     kgc.gen_configuration()
     kgc.dump_properties('final')
+    kgc.dump_snapshot0()
+    if not isWindows():
+        kgc.start_services()
 
 if __name__ == '__main__':
     main()

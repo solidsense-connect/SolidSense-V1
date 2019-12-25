@@ -110,6 +110,12 @@ class ModemGps(SolidSenseService):
         json.dump(self._parameters,fd,indent=1)
         fd.close()
 
+    def startService(self):
+        if self._state == 'active' :
+            servlog.info('Systemd activation for: '+self._name)
+            systemCtl('enable',self._system_serv)
+            systemCtl('start',self._system_serv)
+
 
 def main():
     pass
