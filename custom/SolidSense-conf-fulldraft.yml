@@ -1,0 +1,141 @@
+#
+#  Test file for SolidSense provisioning
+#
+# Global variable definition
+#
+#
+#  Services definition
+#
+- service:
+    type: KuraService
+    name: KapuaMQTT
+    parameters:
+        snapshot: MqttDataTransport
+    properties:
+        broker-url: mqtt://kapua.solidsense.io:1883
+        topic.context.account-name: SOLIDSENSE-TEST
+        username: solidsense-internal
+        password: '$SolidSense2019$'
+
+- service:
+    type: EthernetService
+    name: eth0
+    parameters:
+        snapshot: NetworkConfigurationService
+        prefix: net.interface.$service_name
+        default: eth0-WAN
+    variable:
+    properties:
+        config.ip4.status: netIPv4StatusEnabledWAN
+
+
+- service:
+    type: PppService
+    name: ppp0
+    parameters:
+        snapshot: NetworkConfigurationService
+        default: ppp0-WAN
+        prefix: net.interface.$service_name
+    variables:
+        APN: orange
+        APN_AUTH: PAP
+        APN_USER: orange
+        APN_PASSWORD: orange
+        DIAL_STRING: atd*99***#
+    properties:
+        config.apn: $APN
+        config.authType: $APN_AUTH
+        modem.identifier: $MODEM_MODEL
+        config.username: $APN_USER
+        config.password: $APN_PASSWORD
+        config.dialString: $DIAL_STRING
+
+- service:
+    type: WiFiService
+    name: wlan0
+    parameters:
+        snapshot: NetworkConfigurationService
+        default: wlan0-AP
+        prefix: net.interface.$service_name
+    variables:
+        WPA_KEYMGMT: WPA-PSK
+        WIFI_PASSWORD: testKEYS
+        WPA_LEVEL: 2
+        WPA_PAIRWISE: CCMP
+        WIFI_MODE: n
+        WIFI_CHANNEL: 5 
+    properties:
+        config.wifi.master.securityType: SECURITY_WPA2
+        master.ssid: $SERIAL_NUMBER
+        config.wifi.infra.passphrase: $WIFI_PASSWORD
+        config.wifi.master.pairwiseCiphers: $WPA_PAIRWISE
+        config.ip4.address=172.16.1.1: 172.16.1.1
+        dhcpServer4.rangeStart: 172.16.1.100
+        dhcpServer4.rangeEnd: 172.16.1.115
+
+- service:
+    type: WirepasSink
+    name: sink1
+    parameters:
+        snapshot: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasSink1
+        start: True
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 10
+        ADDRESS: 2
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+
+- service:
+    type: WirepasSink
+    name: sink2
+    parameters:
+        snapshot: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService 
+        system: wirepasSink2
+        start: True
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 10
+        ADDRESS: 4
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+        
+- service:
+    type: WirepasTransport
+    name: wirepas-cloud
+    parameters:
+        snapshot: WirepasConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasTransport1
+        prefix: transportA
+        start: True
+        autostart: False
+        customId:
+    variables:
+        ENABLE: True
+        SECURE: True
+        ADDRESS: solidrunwpewnt.extwirepas.com
+        PORT: 8883
+        USER: mosquittouser
+        PASSWORD: peWVOA8qisIvBQYt6LkVJKCusVJl
+    properties:
+        enable: $ENABLE
+        secure: $SECURE
+        address: $ADDRESS
+        user: $USER
+        port: $PORT
+        passwd: $PASSWORD
+        
+       
