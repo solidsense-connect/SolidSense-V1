@@ -103,7 +103,7 @@ services:
 - service:
     type: WirepasSink
     name: sink2
-    state: active
+    state: disabled
     parameters:
         configuration: WirepasSinkConfigurationService
         plugin: WirepasConfigurationService.dp

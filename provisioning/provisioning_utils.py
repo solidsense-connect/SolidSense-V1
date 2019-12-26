@@ -5,8 +5,8 @@
 # Author:      Laurent
 #
 # Created:     27/11/2019
-# Copyright:   (c) Laurent 2019
-# Licence:     <your licence>
+# Copyright:   (c) Laurent Carré Sterwen Technologies 2019
+# Licence:     Eclipse Public License 1.0
 #-------------------------------------------------------------------------------
 
 import platform

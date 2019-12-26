@@ -5,8 +5,8 @@
 # Author:      Laurent
 #
 # Created:     27/11/2019
-# Copyright:   (c) Laurent 2019
-# Licence:     <your licence>
+# Copyright:   (c) Laurent Carré Sterwen Technologies 2019
+# Licence:     Eclipse Public License 1.0
 #-------------------------------------------------------------------------------
 
 import logging
@@ -325,6 +325,8 @@ class WirepasMicroService(KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
+        if self._state == 'disabled' :
+            return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
         self._service=self.parameterValue('system')
@@ -339,7 +341,7 @@ class WirepasMicroService(KuraService):
             servlog.error("Wirepas micro service "+file+" :"+err)
             return
         write_header(fd)
-        if self._keywords.get('GLOBAL',False):
+        if self.variableValue('GLOBAL'):
             addr='[::]'
         else:
             addr='127.0.0.1'

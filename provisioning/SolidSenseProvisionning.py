@@ -6,7 +6,7 @@
 #
 # Created:     22/11/2019
 # Copyright:   (c) Laurent Carré Sterwen Technologies 2019
-# Licence:     <your licence>
+# Licence:     Eclipse Public License 1.0
 #-------------------------------------------------------------------------------
 
 import yaml
@@ -35,12 +35,8 @@ class GlobalKuraConfig:
     kura_custom.properties
     kuranet.conf
 
-    snapshot_sections = ["header", "firewall", "net", "watchdog", "clock",
-                         "H2Db", "mqtt", "data", "position", "cloud", "ssl"]
-    process_section = {
-        "header": False, "firewall": False, "net": True, "watchdog": False,
-        "clock": False, "H2Db": False, "mqtt": True, "data":False,
-        "position": False, "cloud": False, "ssl": False}
+    but also drives additional configuration by services
+
     '''
 
     def __init__(self,template_dir,config_dir):
@@ -376,7 +372,8 @@ class GlobalKuraConfig:
             if type(value) != str :
                 value=str(value)
             fo.write(value)
-            fo.write('\n')
+            fo.write(line[ke+2:])
+            # fo.write('\n')
             # next line
 
 
@@ -428,7 +425,7 @@ def read_service_def(kgc_o,serv_file):
     services_def=res.get('services')
     if services_def == None :
         servlog.info('No services definition')
-        return
+        return True
 
     # print (res)
     for s in services_def:
@@ -454,6 +451,7 @@ def read_service_def(kgc_o,serv_file):
             override=service_def['override']
         except KeyError :
             override=True
+
         if not override :
             service = kgc_o.get_service(service_name)
             if service == None :
@@ -467,6 +465,7 @@ def read_service_def(kgc_o,serv_file):
             servlog.info("adding Service:"+service_class_name+" name:"+service.name())
             kgc_o.add_service(service_name,service)
 
+    return False
 
 def main():
     # template_dir='C:\\Users\\laure\\Sterwen-Tech\\Git-SolidRun\\SolidSense-V1\\template'

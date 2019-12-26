@@ -6,11 +6,11 @@
 #
 # Created:     27/11/2019
 # Copyright:   (c) Laurent Carré Sterwen Technologies 2019
-# Licence:     <your licence>
+# Licence:     Eclipse Public License 1.0
 #-------------------------------------------------------------------------------
 import os, sys, inspect
-cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "../../Modem_GPS_Service")))
-sys.path.insert(0, cmd_subfolder)
+# cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "../modem_gps")))
+sys.path.insert(0, '/opt/SolidSense/modem_gps')
 
 import json
 import logging
@@ -41,8 +41,74 @@ class PppService(NetworkService):
     def configuration(self):
         if not self._valid :
             return
+        if self._state == 'disabled':
+            return
         NetworkService.configuration(self)
-        # kura_config.addPpp()
+        kura_id=self._kura_config.get_variable('MODEM_KURAID')
+        #
+        #  generations of the files
+        #
+        #  peer file
+        peersdir=self._kura_config.output_dir('/etc/ppp/peers')
+        peer=os.path.join(peersdir,kura_id)
+        self._kura_config.gen_from_template(self,'ppp','peer.tmpl',peer)
+        # chat
+        outdir=self._kura_config.output_dir('/etc/ppp/scripts')
+        # check if the scripts dir is existing
+        if not os.path.exists(outdir) :
+            os.mkdir(outdir)
+
+        outfile=os.path.join(outdir,'chat_'+kura_id)
+        self._kura_config.gen_from_template(self,'ppp','chat.tmpl',outfile)
+        # disconnect
+        outfile=os.path.join(outdir,'disconnect_'+kura_id)
+        self._kura_config.gen_from_template(self,'ppp','disconnect.tmpl',outfile)
+        if isWindows():
+            return
+        # generate the link
+        port=os.path.join(peersdir,self._name)
+        try:
+            res=os.lstat(port)
+            os.remove(port)
+        except IOError :
+            pass
+
+        os.symlink(peer,port)
+        #
+        #   create entry in secret files
+        #
+        def add_secret_entry(file):
+            filename=os.path.join('/etc/ppp',file)
+            try:
+                fd=open(filename,'a')
+            except IOError as err:
+                servlog.error(str(err))
+                return
+            line="%s\t*\t%s\t*\t#%s\n"%(user,passwd,model)
+            fd.write(line)
+            fd.close()
+
+
+        if self.asVariable('APN_AUTH') :
+            auth=self.variableValue('APN_AUTH')
+            gen_pap=False
+            gen_chap=False
+            if auth == 'AUTO' or auth == 'PAP':
+                gen_pap= True
+            if auth == 'AUTO' or auth == 'PAP':
+                gen_chap=True
+            if not(gen_pap or gen_chap ):
+                return
+            user=self.variableValue('APN_USER')
+            if user == None : user=""
+            passwd=self.variableValue('APN_PASSWORD')
+            if passwd == None : passwd = ""
+            model=self.variableValue('MODEM_MODEL')
+            if gen_chap :
+               add_secret_entry('chap-secrets')
+            if gen_pap :
+                add_secret_entry('pap-secrets')
+
 
 
 class ModemGps(SolidSenseService):
@@ -53,6 +119,7 @@ class ModemGps(SolidSenseService):
             kura_config.set_variable('MODEM_MODEL',"EC25")
             self._state='active'
             self._valid=True
+            kura_config.set_variable('MODEM_KURAID',"EC25_2-1.2")
         else:
             tty1=self.parameterValue('modem_ctrl')
             if not os.path.exists(tty1) :
@@ -74,10 +141,12 @@ class ModemGps(SolidSenseService):
             #
             #  now get the parameters
             #
+            modem_kura_id=modem.model()+"_2-1.2"
             kura_config.set_variable('MODEM_MFG',modem.manufacturer())
             kura_config.set_variable('MODEM_MODEL',modem.model())
             kura_config.set_variable('MODEM_IMEI',modem.IMEI())
             kura_config.set_variable('MODEM_SIM_IN',modem.SIM_Present())
+            kura_config.set_variable('MODEM_KURAID',modem_kura_id)
             self._valid= True
             if self._state == 'auto' :
                 self._state = 'active'
