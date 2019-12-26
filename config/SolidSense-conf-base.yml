@@ -43,6 +43,7 @@ services:
         topic.context.account-name: SOLIDSENSE-NURSERY
         username: newborn-gw
         password: ^$SolidSense2019$
+        client-id: $SERIAL-NUMBER
         
 - service:
     # Data service (MQTT) parameters
