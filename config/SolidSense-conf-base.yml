@@ -74,6 +74,7 @@ services:
         config.ip4.status: netIPv4StatusEnabledLAN
         config.state: ACTIVATED
         
+        
 #
 #  Default network configuration
 #   WAN => Eth0 / DHCP
@@ -91,6 +92,7 @@ services:
     properties:
         config.ip4.status: netIPv4StatusEnabledWAN
         config.dhcpClient4.enabled: true
+        config.dhcpServer4.enabled: false
         config.autoconnect: true
         
 #

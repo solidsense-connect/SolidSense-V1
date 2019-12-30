@@ -69,6 +69,8 @@ services:
         config.dhcpClient4.enabled: true
         config.enabled: true
         config.autoconnect: true
+        usb.product.name: $MODEM_MODEL
+        usb.vendor.name: $MODEM_MFG
 #
 # Ethernet as LAN for ppp as WAN
 #        

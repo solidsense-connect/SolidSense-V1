@@ -109,10 +109,10 @@
                 <esf:value>wlan0,lo,ppp0,eth0,docker0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.mac" type="String">
-                <esf:value>20:78:54:3F:C0:3E</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.config.dhcpServer4.rangeEnd" type="String">
-                <esf:value>172.16.0.110</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.loopback" type="Boolean">
                 <esf:value>false</esf:value>
@@ -124,7 +124,7 @@
                 <esf:value>ACTIVATED</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.dhcpServer4.rangeStart" type="String">
-                <esf:value>172.16.1.100</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.status" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
@@ -154,7 +154,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.ip4.gateway" type="String">
-                <esf:value>192.168.1.1</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.ppp0.loopback" type="Boolean">
                 <esf:value>false</esf:value>
@@ -190,10 +190,10 @@
                 <esf:value>g</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.ip4.address" type="String">
-                <esf:value>192.168.1.15</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.mac" type="String">
-                <esf:value>F0:45:DA:22:F8:B1</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.ppp0.config.dataCompression" type="Integer">
                 <esf:value>0</esf:value>
@@ -295,7 +295,7 @@
                 <esf:value>ETHERNET</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.eth0.config.dhcpServer4.rangeStart" type="String">
-                <esf:value>172.16.0.100</esf:value>
+                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.ppp0.type" type="String">
                 <esf:value>MODEM</esf:value>

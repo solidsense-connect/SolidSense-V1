@@ -60,12 +60,15 @@ class SnapshotFile:
         except IOError as err:
             print(err)
 
-    def write_simple(self,filename):
-        try:
-            fd=open(filename,'w')
-        except IOError as err:
-            loclog.error("cannot open:"+filename+" "+str(err))
-            return
+    def write_simple(self,filename=None):
+        if filename == None :
+            fd=sys.stdout
+        else:
+            try:
+                fd=open(filename,'w')
+            except IOError as err:
+                loclog.error("cannot open:"+filename+" "+str(err))
+                return
         for c in self._configurations.values():
             c.write_simple(fd)
         fd.close()
@@ -193,12 +196,16 @@ class SnapshotProperty:
 
 
 def main():
-    # xt=SnapshotElement('../template/kura/snapshot0-elements/snapshot_0-position.xml')
-    xt=SnapshotFile('../template/kura/snapshot_0-ref1.xml')
-    # xt.write_simple('all_elem.conf')
-    # conf=xt.get_configuration('MqttDataTransport')
-    # ET.dump(conf.xml_elem())
-    xt.write("test.xml")
+    if len(sys.argv) < 2 :
+        print("Need an xml input file")
+        return
+    print("analyszing file:",sys.argv[1])
+    snf=SnapshotFile(sys.argv[1])
+    if len(sys.argv) > 2 :
+        filename=sys.argv[2]
+    else:
+        filename=None
+    snf.write_simple(filename)
 
 if __name__ == '__main__':
     main()
