@@ -12,6 +12,7 @@
 import logging
 import os
 import time
+import json
 
 from provisioning_utils import *
 
@@ -82,6 +83,12 @@ class SolidSenseService:
         if name in self._variables.keys():
             return True
         return self._kura_config.asVariable(name)
+
+    def asParameter(self,name):
+        if name in self._parameters.keys():
+            return True
+        else:
+            return False
 
     def checkAndReplaceVar(self,value):
         if type(value) != str :
@@ -243,7 +250,7 @@ class WirepasSink(KuraService):
         fd.close
 
     def startService(self):
-        print('starting sink service:',self._name," ",self._state)
+        # print('starting sink service:',self._name," ",self._state)
         if self._state == 'active':
             servlog.info('Systemd activation for: '+self._name)
             systemCtl('enable',self._syst_service)
@@ -355,6 +362,7 @@ BluetoothDataDir='/data/solidsense/ble_gateway'
 class BluetoothService (KuraService):
     Transport_Cmd={"ADDRESS":"mqtt_hostname","PORT":"mqtt_port","USER":"mqtt_username","PASSWORD":"mqtt_password",
     "FILTERS":"ble_filters","SCAN":"ble_scan"}
+    Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
     def __init__(self,kura_config,def_dict):
         KuraService.__init__(self,kura_config,def_dict)
 
@@ -386,6 +394,35 @@ class BluetoothService (KuraService):
             self._gwid=self.variableValue('SERIAL-NUMBER')
 
         self.gen_transport_conf()
+        # now generate the parameters.json
+        param={}
+        for key,value in  BluetoothService.Default_Parameters.items():
+            if self.asParameter(key):
+                param[key]=self.parameterValue(key)
+            else:
+                param[key]=value
+        outdir=self._kura_config.output_dir(BluetoothDataDir)
+        file=os.path.join(outdir,'parameter.json')
+        try:
+            fd=open(file,'w')
+        except IOError as err:
+            servlog.error("Bluetooth "+str(err))
+            return
+        json.dump(param,fd,indent=1)
+        fd.write('\n')
+        fd.close()
+
+    def startService(self):
+        # now activate the services for hci1 and hci2
+
+        interface=self.parameterValue('interface')
+        if interface == 'hc1':
+            systemCtl('enable','ble1')
+            systemCtl('start','ble1')
+        elif interface == 'hci2':
+            systemCtl('enable','ble2')
+            systemCtl('start','ble2')
+
 
     def gen_transport_conf(self):
         outdir=self._kura_config.output_dir(BluetoothDataDir)

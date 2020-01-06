@@ -193,8 +193,6 @@ class SnapshotProperty:
 
 
 
-
-
 def main():
     if len(sys.argv) < 2 :
         print("Need an xml input file")

@@ -49,14 +49,15 @@ modem_gps: enabled if the modem is present
 
 The customer specific configuration Yaml file is /data/solidsense/config/SolidSense-conf-custom.yml. That file is optional, and ig the provisioning does not find it is applies only the Factory configuration.
 
+
 There is no file by default and several template will be supplied on the developer Wiki.
 
-In the customer configuration file (see example) the following cahnges can easily be configured:
+In the customer configuration file (see example) the following changes can easily be configured:
 
 - adding ppp0 as WAN interface
 - adding Wirepas services
 - adding the Bluetooth service
-- Conf 
+- Configuring default values including WiFi keys, Kura web credentials... 
 
 
 
