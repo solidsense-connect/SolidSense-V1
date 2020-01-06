@@ -416,7 +416,7 @@ class BluetoothService (KuraService):
         # now activate the services for hci1 and hci2
 
         interface=self.parameterValue('interface')
-        if interface == 'hc1':
+        if interface == 'hci1':
             systemCtl('enable','ble1')
             systemCtl('start','ble1')
         elif interface == 'hci2':
