@@ -10,12 +10,12 @@
 #   Wirepas
 #   =======
 #   sink1 enabled - SolidRun default
-#   sink2 enabled - SolidRun default
+#   sink2 disabled - For dual technology testing
 #   transport1 auto start with Kura
 #
-#   Bluetooth enable on hci0
+#   Bluetooth enable on hci1
 #
-#  Copyright Sterwen-Technology/SolidRun 2019
+#  Copyright Sterwen-Technology/SolidRun 2019-2020
 #
 #  **********************************************************
 #  *    WARNING                                             *
@@ -35,7 +35,14 @@
 #
 gateway:
 
-    snapshot_0: snapshot_0-full.xml
+    snapshot_0: snapshot_0-full.xml #this is the template snapshot do not change it unless full test
+    #
+    # set of global variables
+    #
+    MQTT_BROKER: 192.168.1.21
+    MQTT_PORT: 1883
+    MQTT_USER: solidsense
+    MQTT_PASSWORD: solidsense
 #
 #  Services definition
 #
@@ -81,7 +88,12 @@ services:
     properties:
         config.ip4.status: netIPv4StatusEnabledLAN
         
-
+#
+#   Wirepas services => enable only if Wirepas is to be used
+#   And if the right firmware has been flashed in the Nordic chips (sink)
+#
+#   sink1 only is active in this configuration as the other Nordic is used for Bluetooth
+#
 - service:
     type: WirepasSink
     name: sink1
@@ -91,6 +103,7 @@ services:
         plugin: WirepasConfigurationService.dp
         plugin_name: WirepasConfigurationService
         system: wirepasSink1
+        port: ttymxc1       # physical port
         
     variables:
         NETWORK_ID: 10450204
@@ -111,6 +124,7 @@ services:
         plugin: WirepasConfigurationService.dp
         plugin_name: WirepasConfigurationService 
         system: wirepasSink2
+        port: ttymxc2
         
     variables:
         NETWORK_ID: 10450204
@@ -147,11 +161,15 @@ services:
         user: $USER
         port: $PORT
         passwd: $PASSWORD
-        
+#
+#   Bluetooth services => only one can be active
+#
+#   hci0 on TI WL1831 on internal interface is disabled
+#      
 - service:
     type: BluetoothService
     name: hci0
-    state: auto
+    state: disabled
     parameters:
         configuration: BLEConfigurationService
         plugin: BLEConfigurationService.dp
@@ -163,21 +181,40 @@ services:
         notif_mtu: 63
         trace: info
         debug_bluez: false
-    variables:
-        ADDRESS: 192.168.1.21
-        PORT: 1883
-        SECURE: false
-        USER: solidsense
-        PASSWORD: solidsense
-        FILTERS: ""
-        SCAN: ""
+    properties:
+        transport.enabled: false
+        transport.address: $MQTT_BROKER
+        transport.port: $MQTT_PORT
+        transport.user: $MQTT_USER
+        transport.passwd: $MQTT_PASSWORD
+        transport.filters: ""
+        transport.scan: ""
+#
+#   hci1 is using the second Nordic
+#        
+- service:
+    type: BluetoothService
+    name: hci1
+    state: auto
+    parameters:
+        configuration: BLEConfigurationService
+        plugin: BLEConfigurationService.dp
+        plugin_name: BLEConfigurationService
+        system: bleTransport
+        port: ttymxc2       # physical port
+        gatewayID: device
+        interface: $service_name
+        max_connect: 10
+        notif_mtu: 63
+        trace: info
+        debug_bluez: false
+    
     properties:
         transport.enabled: true
-        transport.address: $ADDRESS
-        transport.port: $PORT
-        transport.user: $USER
-        transport.passwd: $PASSWORD
-        transport.filters: $FILTERS
-        transport.scan: $SCAN
-        
+        transport.address: $MQTT_BROKER
+        transport.port: $MQTT_PORT
+        transport.user: $MQTT_USER
+        transport.passwd: $MQTT_PASSWORD
+        transport.filters: ""
+        transport.scan: ""
         

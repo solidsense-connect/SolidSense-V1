@@ -415,13 +415,16 @@ class BluetoothService (KuraService):
     def startService(self):
         # now activate the services for hci1 and hci2
 
-        interface=self.parameterValue('interface')
-        if interface == 'hci1':
+        interface=self.parameterValue('port')
+        if interface == None: return
+        if interface == 'ttymxc1':
             systemCtl('enable','ble1')
             systemCtl('start','ble1')
-        elif interface == 'hci2':
+        elif interface == 'ttymxc2':
             systemCtl('enable','ble2')
             systemCtl('start','ble2')
+        else:
+            servlog.error("Bluetooth transport - unknown port:"+interface)
 
 
     def gen_transport_conf(self):
