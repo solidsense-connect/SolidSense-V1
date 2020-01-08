@@ -18,13 +18,18 @@ from provisioning_utils import *
 
 servlog=logging.getLogger('SolidSense-provisioning')
 
+state_DISABLED='disabled'
+state_ACTIVE='active'
+state_AUTO='auto'
+state_INTERACTIVE='interactive'
+
 class SolidSenseService:
 
     def __init__(self,kura_config,def_dict):
 
         self._name=def_dict.get('name','**No name**')
         self._kura_config=kura_config
-        self._state=def_dict.get('state','unknown')
+        self._state=def_dict.get('state',state_DISABLED)
         self._parameters=def_dict.get('parameters',{})
         self._variables=def_dict.get('variables')
         if self._variables == None :
@@ -223,14 +228,11 @@ class WirepasSink(KuraService):
         # self.dump_variables()
 
     def configuration(self):
-        if self._state == 'disabled' :
+        if self._state == state_DISABLED :
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
-        # kura_config.add_snapshot_0_element('wirepas-sink')
-        self.configSink()
-
-    def configSink(self):
+        # mandatory setup
         try:
             self._syst_service= self._parameters['system']
             plugin= self._parameters['plugin']
@@ -239,6 +241,12 @@ class WirepasSink(KuraService):
             servlog.error('Wirepas Sink:'+self._name+' Missing parameters')
             return
         self._kura_config.add_plugin(plugin_name,plugin)
+        if self._state == state_INTERACTIVE :
+            return
+        self.configSink()
+
+    def configSink(self):
+
         # write the configuration file
         outdir=self._kura_config.output_dir(WirepasDataDir)
         fd=open(os.path.join(outdir,'wirepasSinkConfig.service.cfg'),'w')
@@ -251,7 +259,7 @@ class WirepasSink(KuraService):
 
     def startService(self):
         # print('starting sink service:',self._name," ",self._state)
-        if self._state == 'active':
+        if self._state == state_ACTIVE:
             servlog.info('Systemd activation for: '+self._name)
             systemCtl('enable',self._syst_service)
             systemCtl('start',self._syst_service)
@@ -270,7 +278,7 @@ class WirepasTransport(KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
-        if self._state == 'disabled' :
+        if self._state == state_DISABLED :
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
@@ -279,6 +287,8 @@ class WirepasTransport(KuraService):
         plugin_name= self.parameterValue('plugin_name')
 
         self._kura_config.add_plugin(plugin_name,plugin)
+        if self._state == state_INTERACTIVE :
+            return
         # compute the gateway-id
         gatewayID=self.parameterValue('gatewayID')
         customID= self.parameterValue('customID')
@@ -332,11 +342,13 @@ class WirepasMicroService(KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
-        if self._state == 'disabled' :
+        if self._state == state_DISABLED :
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
         self._service=self.parameterValue('system')
+        if self._state == state_INTERACTIVE :
+            return
         self.gen_microservice_conf()
 
 
@@ -367,7 +379,7 @@ class BluetoothService (KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
-        if self._state == 'disabled' :
+        if self._state == state_DISABLED :
             return
         KuraService.configuration(self)
         checkCreateDir(BluetoothDataDir)
@@ -376,6 +388,8 @@ class BluetoothService (KuraService):
         plugin_name= self.parameterValue('plugin_name')
 
         self._kura_config.add_plugin(plugin_name,plugin)
+        if self._state == state_INTERACTIVE :
+            return
         # compute the gateway-id
         gatewayID=self.parameterValue('gatewayID')
         customID= self.parameterValue('customID')
@@ -402,7 +416,7 @@ class BluetoothService (KuraService):
             else:
                 param[key]=value
         outdir=self._kura_config.output_dir(BluetoothDataDir)
-        file=os.path.join(outdir,'parameter.json')
+        file=os.path.join(outdir,'parameters.json')
         try:
             fd=open(file,'w')
         except IOError as err:
@@ -423,6 +437,8 @@ class BluetoothService (KuraService):
         elif interface == 'ttymxc2':
             systemCtl('enable','ble2')
             systemCtl('start','ble2')
+        elif interface == 'internal' :
+            pass
         else:
             servlog.error("Bluetooth transport - unknown port:"+interface)
 

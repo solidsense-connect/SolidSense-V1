@@ -49,17 +49,31 @@ modem_gps: enabled if the modem is present
 
 The customer specific configuration Yaml file is /data/solidsense/config/SolidSense-conf-custom.yml. That file is optional, and ig the provisioning does not find it is applies only the Factory configuration.
 
+### Custom reference configuration files
 
+There are 3 reference/sample files in the custom directory. They must be renamed 'SolidSense-conf-custom.yml' and copied in the /data/solidsense:config directory to be effective
 
-There is no file by default and several template will be supplied on the developer Wiki.
+Default file that is basically adding only the Bluetooth on hci0: SolidSense-conf-default.yml. That file can be loaded by default.
 
-In the customer configuration file (see example) the following changes can easily be configured:
+Wirepas default file: SolidSense-conf-wirepas.yml: That file must be loaded with the Wirepas option
+
+Sample configuration file for reference for a more diverse configuration:
 
 - adding ppp0 as WAN interface
 - adding Wirepas services
 - adding the Bluetooth service
-- Configuring default values including WiFi keys, Kura web credentials... 
+- Configuring default values including WiFi keys, Kura web credentials...
 
+Additional files and tips to be published on the developer Wiki
+
+### Applying a custom automatic configuration
+
+The process to apply the custom configuration (outside factory installation) is the following:
+1- Copy the file with configuration (Provisioning YAML file) into /data/solidsense:config/SolidSense-conf-custom.yml
+2- Wipe out overlay file system
+3- reboot
+
+After the complete reboot the gateway is ready nwith the configuration, so no need to have interactive entries.
 
 
 # RPMB content
