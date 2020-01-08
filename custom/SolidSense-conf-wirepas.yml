@@ -1,19 +1,20 @@
 #
 #  Custom template file for SolidSense provisioning
+#
+#   Wirepas configuration with 2 sinks enabled
+#   ==========================================
 #    This file drives the following configuration
 #   Network
 #   ========
-#   eth0=> LAN, DHCP client
-#   wlan0 => (default) Access point, LAN, DHCP server, router
-#   ppp0 => WAN
+#   Default
 #
 #   Wirepas
 #   =======
-#   sink1 enabled - SolidRun default
-#   sink2 disabled - For dual technology testing
-#   transport1 auto start with Kura
+#   sink1 intercative
+#   sink2 interactive
+#   transport1 interactive
+#   All configurations via KURA
 #
-#   Bluetooth enable on hci1
 #
 #  Copyright Sterwen-Technology/SolidRun 2019-2020
 #
@@ -27,6 +28,7 @@
 #   state is used for activable services (pure data services don't need one)
 #   disabled    the service will not be configured and and started
 #   auto        the service is configured but the start and activation is done by another process or context dependant
+#   interactive the service configuration is to be done via Kura
 #   active      the service is configured and activared during provisioning
 #
 #   override    (true by default) replace the default service definition, false, combine both definitions
@@ -36,68 +38,22 @@
 gateway:
 
     snapshot_0: snapshot_0-full.xml #this is the template snapshot do not change it unless full test
-    #
-    # set of global variables
-    #
-    MQTT_BROKER: 192.168.1.21
-    MQTT_PORT: 1883
-    MQTT_USER: solidsense
-    MQTT_PASSWORD: solidsense
-#
-#  Services definition
-#
-services:
-
-#
-#   ppp as WAN
-#
-- service:
-    type: PppService
-    name: ppp0
-    state: active
-    override: true
-    parameters:
-        configuration: NetworkConfigurationService
-        prefix: net.interface.$service_name
-    variables:
-        APN: orange
-        APN_AUTH: PAP
-        APN_USER: orange
-        APN_PASSWORD: orange
-        DIAL_STRING: atd*99***#
-    properties:
-        config.apn: $APN
-        config.authType: $APN_AUTH
-        config.identifier: $MODEM_MODEL
-        config.username: $APN_USER
-        config.password: $APN_PASSWORD
-        config.dialString: $DIAL_STRING
-        config.ip4.status: netIPv4StatusEnabledWAN
-        config.dhcpClient4.enabled: true
-        config.enabled: true
-        config.autoconnect: true
-        usb.product.name: $MODEM_MODEL
-        usb.vendor.name: $MODEM_MFG
-#
-# Ethernet as LAN for ppp as WAN
-#        
-- service:
-    name: eth0
-    type: NetworkService
-    override: false
-    properties:
-        config.ip4.status: netIPv4StatusEnabledLAN
-        
+    
+    
+#######################################################
+#                Services definition
+#######################################################
+services:        
 #
 #   Wirepas services => enable only if Wirepas is to be used
 #   And if the right firmware has been flashed in the Nordic chips (sink)
 #
-#   sink1 only is active in this configuration as the other Nordic is used for Bluetooth
+#   Variables are here for reference and example and are not used in interactive mode
 #
 - service:
     type: WirepasSink
     name: sink1
-    state: active
+    state: interactive
     parameters:
         configuration: WirepasSinkConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -106,9 +62,9 @@ services:
         port: ttymxc1       # physical port
         
     variables:
-        NETWORK_ID: 10450204
-        NETWORK_CHANNEL: 10
-        ADDRESS: 2
+        NETWORK_ID: YOUR_ID
+        NETWORK_CHANNEL: YOUR_CHANNEL
+        ADDRESS: YOUR_ADDRESS
     properties:
         sinkAddress: $ADDRESS
         networkChannel: $NETWORK_CHANNEL
@@ -118,7 +74,7 @@ services:
 - service:
     type: WirepasSink
     name: sink2
-    state: disabled
+    state: interactive
     parameters:
         configuration: WirepasSinkConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -127,9 +83,9 @@ services:
         port: ttymxc2
         
     variables:
-        NETWORK_ID: 10450204
-        NETWORK_CHANNEL: 10
-        ADDRESS: 4
+        NETWORK_ID: YOUR_ID
+        NETWORK_CHANNEL: YOUR_CHANNEL
+        ADDRESS: YOUR_ADDRESS
     properties:
         sinkAddress: $ADDRESS
         networkChannel: $NETWORK_CHANNEL
@@ -139,7 +95,7 @@ services:
 - service:
     type: WirepasTransport
     name: wirepas-cloud
-    state: auto
+    state: interactive
     parameters:
         configuration: WirepasConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -150,10 +106,10 @@ services:
     variables:
         ENABLE: True
         SECURE: True
-        ADDRESS: solidrunwpewnt.extwirepas.com
+        ADDRESS: YOUR_BROKER_URL
         PORT: 8883
-        USER: mosquittouser
-        PASSWORD: peWVOA8qisIvBQYt6LkVJKCusVJl
+        USER: YOUR_BROKER_USER
+        PASSWORD: YOUR_BROKER_PASSWD
     properties:
         enabled: $ENABLE
         secured: $SECURE
@@ -177,40 +133,20 @@ services:
         system: bleTransport
         gatewayID: device
         interface: $service_name
+        port: internal
         max_connect: 10
         notif_mtu: 63
         trace: info
         debug_bluez: false
+    variables:
+        ADDRESS: $MQTT_BROKER
+        PORT: $MQTT_PORT
+        USER: $MQTT_USER
+        PASSWORD: $MQTT_PASSWORD
+        FILTERS: ""
+        SCAN: ""
     properties:
         transport.enabled: false
-        transport.address: $MQTT_BROKER
-        transport.port: $MQTT_PORT
-        transport.user: $MQTT_USER
-        transport.passwd: $MQTT_PASSWORD
-        transport.filters: ""
-        transport.scan: ""
-#
-#   hci1 is using the second Nordic
-#        
-- service:
-    type: BluetoothService
-    name: hci1
-    state: auto
-    parameters:
-        configuration: BLEConfigurationService
-        plugin: BLEConfigurationService.dp
-        plugin_name: BLEConfigurationService
-        system: bleTransport
-        port: ttymxc2       # physical port
-        gatewayID: device
-        interface: $service_name
-        max_connect: 10
-        notif_mtu: 63
-        trace: info
-        debug_bluez: false
-    
-    properties:
-        transport.enabled: true
         transport.address: $MQTT_BROKER
         transport.port: $MQTT_PORT
         transport.user: $MQTT_USER
