@@ -1,0 +1,9 @@
+[Unit]
+Description=Start btattach for UBlox on ttymxc2
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/btattach --bredr /dev/ttymxc2 -S 1000000
+
+[Install]
+WantedBy=multi-user.target
