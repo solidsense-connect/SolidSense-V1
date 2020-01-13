@@ -22,7 +22,7 @@ gateway:
     # MODEL-NAME        Description of hardware configuration
     # FIRMWARE          Actual firmware running
     
-    snapshot_0: snapshot_0.xml
+    snapshot_0: snapshot_0-full.xml
     # mode can be normal or test. In test mode all files are generated in /temp directory
     mode: normal 
 #
@@ -155,7 +155,115 @@ services:
         modem_ctrl: /dev/ttyUSB2
         nmea_tty: /dev/ttyUSB1
         trace: info
-        PIN: '0000'
+        PIN: '0000' # this for example - the PIN is used only if the SIM card request it
         roaming: true
         operatorsDB: 'operatorsDB'
         start_gps: false
+#
+#   For continuity Wirepas and Bluetooth services are declared in interactive mode
+#
+#
+#   hci0 on TI WL1831 on internal interface
+#   to be configured via Kura
+#      
+- service:
+    type: BluetoothService
+    name: hci0
+    state: interactive
+    parameters:
+        configuration: BLEConfigurationService
+        plugin: BLEConfigurationService.dp
+        plugin_name: BLEConfigurationService
+        system: bleTransport
+        gatewayID: device
+        interface: $service_name
+        port: internal
+        max_connect: 10
+        notif_mtu: 63
+        trace: info
+        debug_bluez: false
+    variables:
+        ADDRESS: 127.0.0.1
+        PORT: 1883
+        USER: ""
+        PASSWORD: ""
+        FILTERS: ""
+        SCAN: ""
+    properties:
+        transport.enabled: false
+        transport.address: $ADDRESS
+        transport.port: $PORT
+        transport.user: $USER
+        transport.passwd: $PASSWORD
+        transport.filters: ""
+        transport.scan: ""
+#
+#  Wirepas with sink1 and sink2 interactive
+#        
+- service:
+    type: WirepasSink
+    name: sink1
+    state: interactive
+    parameters:
+        configuration: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasSink1
+        port: ttymxc1       # physical port
+        
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 0
+        ADDRESS: 1
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+
+- service:
+    type: WirepasSink
+    name: sink2
+    state: interactive
+    parameters:
+        configuration: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService 
+        system: wirepasSink2
+        port: ttymxc2
+        
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 0
+        ADDRESS: 2
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+        
+- service:
+    type: WirepasTransport
+    name: wirepas-cloud
+    state: interactive
+    parameters:
+        configuration: WirepasConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasTransport1
+        prefix: transportA
+        # customId:
+    variables:
+        ENABLE: True
+        SECURE: True
+        ADDRESS: YOUR_BROKER_URL
+        PORT: 8883
+        USER: YOUR_BROKER_USER
+        PASSWORD: YOUR_BROKER_PASSWD
+    properties:
+        enabled: $ENABLE
+        secured: $SECURE
+        address: $ADDRESS
+        user: $USER
+        port: $PORT
+        passwd: $PASSWORD
