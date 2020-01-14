@@ -254,7 +254,7 @@ services:
         prefix: transportA
         # customId:
     variables:
-        ENABLE: True
+        ENABLE: False
         SECURE: True
         ADDRESS: YOUR_BROKER_URL
         PORT: 8883
