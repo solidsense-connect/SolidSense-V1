@@ -14,6 +14,9 @@ import os
 import subprocess
 import sys
 import datetime
+import logging
+
+servlog=logging.getLogger('SolidSense-provisioning')
 
 def isWindows():
     pl_str=platform.platform()
@@ -24,9 +27,9 @@ def systemCtl(action, service):
     args=['systemctl']
     args.append(action)
     args.append(service)
-    print('Executing:',args)
+    servlog.info('Executing:'+str(args))
     c=subprocess.run(args,stderr=sys.stderr)
-    print('result:',c)
+    servlog.info('result:'+str(c))
     return c.returncode
 
 

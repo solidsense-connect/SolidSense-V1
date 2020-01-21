@@ -52,6 +52,7 @@ class GlobalKuraConfig:
         else:
             self.rpmb_conf()
             self.mender_conf()
+        self.gen_unique_id()
         self.read_model_file()
         self.set_internal_variables()
 
@@ -99,6 +100,7 @@ class GlobalKuraConfig:
         self.set_variable("MODEL-ID",self._model)
         self.set_variable("FIRMWARE",self._firmware)
         self.set_variable("MODEL-NAME",self.get_model_name(self._model))
+        self.set_variable("GW_UNIQUE_ID",self._id)
 
     def read_model_file(self):
         fname= "SolidSense-HW-configurations.yml"
@@ -125,6 +127,29 @@ class GlobalKuraConfig:
 
     def serial_number(self):
         return self._sernum
+
+    def gen_unique_id(self):
+        '''
+        Generate a unique ID on 19 bits
+        serial in week => 11 bits
+        week number => 6 bits
+        year (2 bits) => 2018 => 00 2020 => 01 2021 => 11
+        '''
+        year=int(self._sernum[2:4])
+        week=int(self._sernum[4:6])
+        rank=int(self._sernum[6:])
+        self._id=0
+        if rank > 2047 :
+            servlog.error("Overflow on rank in week")
+            return
+        self._id=rank
+        # now add the week
+        self._id += week << 11
+        year_code= year - 18
+        self._id += year_code << 17
+        print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
+
+
 
     def getSnapshot_conf(self,name):
         return self._snapshot.get_configuration(name)
@@ -304,10 +329,31 @@ class GlobalKuraConfig:
             fd.write('\n')
         fd.close()
 
+    def gen_secondary_global(self):
+        '''
+        generate the global variables that can depends on other variables
+        '''
+        prefix_s=self.variableValue('ADDRESS_PREFIX')
+        if prefix_s == None :
+            prefix=0
+        else:
+            try:
+                prefix=int(prefix_s)
+            except ValueError :
+                prefix=0
+        if prefix < 0 or prefix > 15 :
+            servlog.error("ADDRESS_PREFIX must be in range [0-15]")
+            prefix=0
+        addrb= (self._id << 1) + (prefix << 20)
+        print("ADDRESS0: %08X"%addrb)
+        self.set_variable('UNIQUE_ADDRESS0',addrb)
+        self.set_variable('UNIQUE_ADDRESS1',addrb+1)
+
 
     def dump_variables(self):
+        servlog.info("****** Declared variables and values *******")
         for item in self._variables.items() :
-            print(item[0],'=',item[1])
+            servlog.info(item[0]+'='+str(item[1]))
 
     def dump_properties(self,name):
         filename=name+".properties"
@@ -421,7 +467,7 @@ def read_service_def(kgc_o,serv_file):
     else:
         for name,value in global_def.items() :
             kgc_o.set_variable(name,value)
-        kgc_o.dump_variables()
+        #kgc_o.dump_variables()
     services_def=res.get('services')
     if services_def == None :
         servlog.info('No services definition')
@@ -473,39 +519,60 @@ def main():
     if isWindows():
         config_dir='X:\Sterwen-Tech-SW\SolidSense-V1\config'
         template_dir='X:\Sterwen-Tech-SW\SolidSense-V1\\template'
+        custom_dir='..\\custom'
     else:
         config_dir='/opt/SolidSense/config'
         template_dir='/opt/SolidSense/template'
+        custom_dir='/data/solidsense/config'
+        checkCreateDir(custom_dir)
 
     global servlog
+    master_file="SolidSense-conf-base.yml"
+    if len(sys.argv) >1 :
+        option=sys.argv[1]
+        if len(sys.argv) > 2 :
+            master_file=sys.argv[2]
+    else:
+        option=None
     #template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
     # config_dir= '/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/config'
     # looging system
-    root_logger = logging.basicConfig(stream=sys.stdout,level=logging.INFO)
+    logfile=os.path.join(custom_dir,'provisioning.log')
+    # root_logger = logging.basicConfig(filename=logfile,level=logging.INFO)
     servlog=logging.getLogger('SolidSense-provisioning')
+    if option == None and not isWindows():
+        loghandler=logging.FileHandler(logfile,mode='w')
+    else:
+        loghandler=logging.StreamHandler()
+
+    servlog.addHandler(loghandler)
+    servlog.setLevel(logging.INFO)
 
     servlog.info('*******Starting gateway provisioning process***********')
+    loghandler.flush()
     kgc=GlobalKuraConfig(template_dir,config_dir)
-    if len(sys.argv) > 1 :
-        master_file=sys.argv[1]
-    else:
-        master_file="SolidSense-conf-base.yml"
+
     servlog.info("Reading master configuration file:"+master_file)
     serv_file=os.path.join(config_dir,master_file)
     if read_service_def(kgc,serv_file) :
         servlog.critical("Error in default configuration => STOP")
+        loghandler.flush()
         return
     # now check if we a custom configuration file
-    if isWindows() :
-        custom_dir='..\\custom'
-    else:
-        custom_dir='/data/solidsense/config'
-        checkCreateDir(custom_dir)
     custom_file = 'SolidSense-conf-custom.yml'
     cust_file=os.path.join(custom_dir,custom_file)
     servlog.info("REading custom configuration file:"+cust_file)
     if read_service_def(kgc,cust_file) :
         servlog.info("Error in custom configuration file")
+    # generate secondary global variables
+    kgc.gen_secondary_global()
+    # trace the variables
+    kgc.dump_variables()
+    if option != None :
+        if option == "--syntax" :
+            servlog.info("******** Syntax check mode ** No configuration generated")
+            loghandler.flush()
+            return
 
     kgc.read_source_snapshot()
     # dump the properties found
@@ -518,6 +585,7 @@ def main():
     kgc.dump_snapshot0()
     if not isWindows():
         kgc.start_services()
+    loghandler.flush()
 
 if __name__ == '__main__':
     main()

@@ -65,9 +65,9 @@ class SolidSenseService:
 
 
     def dump_variables(self):
-        print("Variables for service: ",self._name)
+        servlog.info("Variables for service: "+self._name)
         for name,value in self._variables.items():
-           print(name,"=",value)
+           servlog.info(name+"="+str(value))
 
     def startService(self):
         pass
@@ -241,9 +241,9 @@ class WirepasSink(KuraService):
             servlog.error('Wirepas Sink:'+self._name+' Missing parameters')
             return
         self._kura_config.add_plugin(plugin_name,plugin)
-        if self._state == state_INTERACTIVE :
-            return
-        self.configSink()
+
+        # self.configSink()
+        # sinks must be configured after starting the service
 
     def configSink(self):
 
@@ -265,6 +265,7 @@ class WirepasSink(KuraService):
             systemCtl('start',self._syst_service)
             # wait to allow the system to start
             time.sleep(1.0)
+            self.configSink()
             systemCtl('start','wirepasSinkConfig')
 
 
