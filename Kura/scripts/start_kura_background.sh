@@ -7,7 +7,7 @@ export MALLOC_ARENA_MAX=1
 # Run the SolidSense provisionning script.
 if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
     cd "/opt/SolidSense/provisioning" || exit
-    python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py
+    python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py | logger --tag "provisioning" 2>&1
 fi
 
 DIR=$(cd "$(dirname "${0}")/.." || exit; pwd)

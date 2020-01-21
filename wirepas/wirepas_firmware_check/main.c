@@ -16,6 +16,7 @@ void usage(const char *name) {
 
 int main(int argc, char *argv[]) {
 	app_res_e e = APP_RES_INTERNAL_ERROR;
+	app_addr_t node_address;
 	uint16_t version[4] = {0};
 	char *ttydev = 0;
 	pid_t pid;
@@ -58,6 +59,15 @@ int main(int argc, char *argv[]) {
 			return e;
 		}
 
+		// get the node address
+		e = WPC_get_node_address(&node_address);
+		if(e != APP_RES_OK) {
+			fprintf(stderr, "Error: WPC_get_node_address((0x%x) returned %i!\n", node_address, e);
+			// shut down (kills this thread!)
+			WPC_close();
+			return e;
+		}
+
 		// shut down (kills this thread!)
 		WPC_close();
 
@@ -69,7 +79,10 @@ int main(int argc, char *argv[]) {
 		// inspect results
 		if(e == APP_RES_OK) {
 			// print firmware version
-			fprintf(stdout, "Found firmware version %i.%i.%i.%i\n", version[0], version[1], version[2], version[3]);
+			fprintf(stdout, "Firmware version: %i.%i.%i.%i\n", version[0], version[1], version[2], version[3]);
+
+			// print node address
+			fprintf(stdout, "Node address: %i\n", node_address);
 
 			// clean exit
 			return 0;
