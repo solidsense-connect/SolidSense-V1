@@ -1,6 +1,6 @@
 /*
  * Wirepas Firmware version check tool
- * 
+ *
  * Copyright: Josua Mayer <josua@solid-run.com>
  */
 #include <signal.h>
@@ -63,8 +63,9 @@ int main(int argc, char *argv[]) {
 		// get the node address
 		e = WPC_get_node_address(&node_address);
 		if(e != APP_RES_OK) {
-			if(e == APP_RES_NODE_ADD_NOT_SET) {
-				fprintf(stderr, "Error: WPC_get_node_address((0x%x) address is not set!\n", node_address, e);
+			if(e == APP_RES_ATTRIBUTE_NOT_SET) {
+				fprintf(stderr, "Error: WPC_get_node_address((0x%x) attribute is not set yet!\n",
+						node_address, e);
 				e = APP_RES_OK;
 				node_address_set = false;
 			} else {
