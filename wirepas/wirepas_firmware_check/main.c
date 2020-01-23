@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 		e = WPC_get_node_address(&node_address);
 		if(e != APP_RES_OK) {
 			if(e == APP_RES_ATTRIBUTE_NOT_SET) {
-				fprintf(stderr, "Error: WPC_get_node_address((0x%x) attribute is not set yet!\n",
+				fprintf(stdout, "Warning: WPC_get_node_address((0x%x) attribute is not set yet!\n",
 						node_address, e);
 				e = APP_RES_OK;
 				node_address_set = false;
