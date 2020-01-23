@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 	uint16_t version[4] = {0};
 	char *ttydev = 0;
 	pid_t pid;
+	int node_address_set = true;
 
 	// take single argument (uart device)
 	if(argc == 0) {
@@ -62,10 +63,16 @@ int main(int argc, char *argv[]) {
 		// get the node address
 		e = WPC_get_node_address(&node_address);
 		if(e != APP_RES_OK) {
-			fprintf(stderr, "Error: WPC_get_node_address((0x%x) returned %i!\n", node_address, e);
-			// shut down (kills this thread!)
-			WPC_close();
-			return e;
+			if(e == APP_RES_NODE_ADD_NOT_SET) {
+				fprintf(stderr, "Error: WPC_get_node_address((0x%x) address is not set!\n", node_address, e);
+				e = APP_RES_OK;
+				node_address_set = false;
+			} else {
+				fprintf(stderr, "Error: WPC_get_node_address((0x%x) returned %i!\n", node_address, e);
+				// shut down (kills this thread!)
+				WPC_close();
+				return e;
+			}
 		}
 
 		// shut down (kills this thread!)
@@ -82,7 +89,11 @@ int main(int argc, char *argv[]) {
 			fprintf(stdout, "Firmware version: %i.%i.%i.%i\n", version[0], version[1], version[2], version[3]);
 
 			// print node address
-			fprintf(stdout, "Node address: %i\n", node_address);
+			if (node_address_set) {
+				fprintf(stdout, "Node address: %i\n", node_address);
+			} else {
+				fprintf(stderr, "Node address is not set!\n");
+			}
 
 			// clean exit
 			return 0;
