@@ -348,7 +348,7 @@ class GlobalKuraConfig:
         # print("ADDRESS0: %08X"%addrb)
         self.set_variable('UNIQUE_ADDRESS0',addrb)
         self.set_variable('UNIQUE_ADDRESS1',addrb+1)
-        self.set_variable('AUTO_PASSWORD','!#'+self._sernum+'#!')
+        self.set_variable('AUTO_PASSWORD','__'+self._sernum+'__')
 
 
     def dump_variables(self):
