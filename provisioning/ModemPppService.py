@@ -159,7 +159,7 @@ class ModemGps(SolidSenseService):
 
 
     def configuration(self):
-        if self._state == 'active' :
+        if self._state == 'active' and self._valid :
             self._parameters['start_gps_service']= True
         else:
             self._parameters['start_gps_service']= False

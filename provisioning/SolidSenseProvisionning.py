@@ -147,7 +147,7 @@ class GlobalKuraConfig:
         self._id += week << 11
         year_code= year - 18
         self._id += year_code << 17
-        print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
+        # print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
 
 
 
@@ -345,9 +345,10 @@ class GlobalKuraConfig:
             servlog.error("ADDRESS_PREFIX must be in range [0-15]")
             prefix=0
         addrb= (self._id << 1) + (prefix << 20)
-        print("ADDRESS0: %08X"%addrb)
+        # print("ADDRESS0: %08X"%addrb)
         self.set_variable('UNIQUE_ADDRESS0',addrb)
         self.set_variable('UNIQUE_ADDRESS1',addrb+1)
+        self.set_variable('AUTO_PASSWORD','!#'+self._sernum+'#!')
 
 
     def dump_variables(self):

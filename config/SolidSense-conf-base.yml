@@ -62,6 +62,15 @@ services:
         configuration: ClockService
     properties:
         enabled: true
+        
+- service:
+    type: KuraService
+    name: CommandService
+    state: active
+    parameters:
+        configuration: CommandCloudApp
+    properties:
+        command.enable: true
 
 - service:
     # Local loop
@@ -254,7 +263,7 @@ services:
         prefix: transportA
         # customId:
     variables:
-        ENABLE: False
+        ENABLE: True
         SECURE: True
         ADDRESS: YOUR_BROKER_URL
         PORT: 8883
