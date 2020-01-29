@@ -4,4 +4,4 @@ Description=Update images.solidsense.io from github
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/systemd/system/images.solidsense.io.env
-ExecStart=/var/www/images.solidsense.io/.scripts/update_site <TOKEN>
+ExecStart=/var/www/images.solidsense.io/.scripts/update_site ${TOKEN}

@@ -2,7 +2,7 @@
 Description=Update images.solidsense.io every 15m
 
 [Timer]
-OnCalendar=*-*-* *:*:15
+OnCalendar=*:0/15
 Persistent=true
 
 [Install]
