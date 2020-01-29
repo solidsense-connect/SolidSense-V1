@@ -9,6 +9,8 @@ DIR_MAPPINGS=" \
 	SolidSense-V1:doc:/var/www/images.solidsense.io/html/SolidSense/doc \
 	SolidSense-V1:custom:/var/www/images.solidsense.io/html/SolidSense/config \
 "
+USERNAME="solidrun-ejb"
+TOKEN=""
 
 #functions
 find_value () {
@@ -79,7 +81,7 @@ handle_linking () {
 			done
 			for file in "${dstdir}"/*; do
 				srcfile="${srcdir}/${repo_subdir}/$(basename "${file}")"
-				if [ ! -f "${srcfile}" ] && [ "${srcfile}" != "index.html" ]; then
+				if [ ! -f "${srcfile}" ] && [ "$(basename "${srcfile}")" != "index.html" ]; then
 					echo "Deleting file: ${file}"
 					rm "${file}"
 				fi
@@ -118,11 +120,11 @@ handle_repo () {
 		)"
 
 		# Update or clone repo
-		if [ -d "${destdir}" ] ; then
+		if [ -d "${destdir}/.git" ] ; then
 			cd "${destdir}" && git pull
 		else
 			mkdir -p "${destdir}"
-			git_url="${protocol}://${repo}"
+			git_url="${protocol}://${USERNAME}:${TOKEN}@${repo}"
 			if [ -z "${branch}" ]; then
 				git clone "${git_url}" "${destdir}"
 			else
@@ -137,4 +139,11 @@ handle_repo () {
 
 # main
 
+if [ $# -ne 1 ]; then
+	echo "Please enter access token"
+	exit 1
+fi
+
+TOKEN="${1}"
 handle_repo
+cd /var/www/images.solidsense.io/html/SolidSense && /var/www/images.solidsense.io/.scripts/recursive_index.pl -r
