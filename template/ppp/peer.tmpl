@@ -1,0 +1,26 @@
+921600
+unit 0
+logfile /var/log/kura-$!MODEM_KURAID!$
+debug
+connect 'chat -v -f /etc/ppp/scripts/chat_$!MODEM_KURAID!$'
+disconnect 'chat -v -f /etc/ppp/scripts/disconnect_$!MODEM_KURAID!$'
+modem
+lock
+noauth
+user "$!APN_USER!$"
+hide-password
+noipdefault
+defaultroute
+usepeerdns
+noproxyarp
+novj
+novjccomp
+nobsdcomp
+nodeflate
+nomagic
+idle 95
+active-filter 'inbound'
+persist
+holdoff 1
+maxfail 5
+connect-delay 1000

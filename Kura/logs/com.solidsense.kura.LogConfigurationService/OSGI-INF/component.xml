@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="com.solidsense.kura.LogConfigurationService">
+   <implementation class="com.solidsense.kura.LogConfigurationService"/>
+   <property name="service.pid" type="String" value="com.solidsense.kura.LogConfigurationService"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <reference bind="setCloudPublisher" cardinality="0..1" interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher" name="CloudPublisher" policy="dynamic" unbind="unsetCloudPublisher"/>
+</scr:component>

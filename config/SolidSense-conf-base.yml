@@ -1,0 +1,278 @@
+#
+#  Base file for SolidSense provisioning V0.95
+#
+#  Copyright Sterwen-Technology/SolidRun 2019
+#
+#   that file provide the basic minimum configuration for Kura and all SolidSense services
+#   It shall be located in /opt/SolidSense/config and named SolidSense-conf-base.yml
+#
+#   The customer specific configuration is located in /data/solidsense/config/SolidSense-conf-custom.yml
+#   The combination of both files will be applied to the gateway
+#
+#   mini language
+#
+# Global variable definition
+gateway:
+    # if the gateway-id is set it will be used as is for all transport service
+    # gateway-id: $SERIAL-NUMBER
+    # here are all the default variable that are created implicitely
+    # SERIAL-NUMBER     serial number of the gateway
+    # PART-NUM          full part number including variant
+    # MODEL-ID          product code
+    # MODEL-NAME        Description of hardware configuration
+    # FIRMWARE          Actual firmware running
+    
+    snapshot_0: snapshot_0-full.xml
+    # mode can be normal or test. In test mode all files are generated in /temp directory
+    mode: normal 
+#
+#
+#  Services definition
+#
+services:
+
+- service:
+    # MQTT connection to Kapua
+    type: KuraService
+    name: KapuaMQTT
+    state: active
+    parameters:
+        configuration: MqttDataTransport
+    properties:
+        broker-url: mqtt://kapua.solidsense.io:1883
+        topic.context.account-name: SOLIDSENSE-NURSERY
+        username: newborn-gw
+        password: ^$SolidSense2019$
+        client-id: $SERIAL-NUMBER
+        
+- service:
+    # Data service (MQTT) parameters
+    type: KuraService
+    name: MqttData
+    parameters:
+        configuration: DataService
+    properties:
+        connect.auto-on-startup: true
+        
+- service:
+    # NTP connection
+    type: KuraService
+    name: Clock
+    parameters:
+        configuration: ClockService
+    properties:
+        enabled: true
+        
+- service:
+    type: KuraService
+    name: CommandService
+    state: active
+    parameters:
+        configuration: CommandCloudApp
+    properties:
+        command.enable: true
+
+- service:
+    # Local loop
+    type: NetworkService
+    name: lo
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    properties:
+        config.ip4.status: netIPv4StatusEnabledLAN
+        config.state: ACTIVATED
+        
+        
+#
+#  Default network configuration
+#   WAN => Eth0 / DHCP
+#   LAN => wlan0
+#
+- service:
+    # Ethernet port
+    type: NetworkService
+    name: eth0
+    state: active
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    variables:
+    properties:
+        config.ip4.status: netIPv4StatusEnabledWAN
+        config.dhcpClient4.enabled: true
+        config.dhcpServer4.enabled: false
+        config.autoconnect: true
+        
+#
+#   WiFi configuration by default
+#   Access point
+#   HW mode=g. Higher mode not yet supported by KuraService
+#
+- service:
+    type: WiFiService
+    name: wlan0
+    state: active
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+        state: active
+    variables:
+        WPA_KEYMGMT: WPA-PSK
+        WIFI_PASSWORD: testKEYS
+        WPA_LEVEL: 2
+        WPA_PAIRWISE: CCMP
+        WIFI_MODE: g
+        WIFI_CHANNEL: 5
+        WLAN-INTERFACE: $service_name
+        
+    properties:
+        config.wifi.mode: MASTER
+        config.ip4.status: netIPv4StatusEnabledLAN
+        config.wifi.master.mode: MASTER
+        config.dhcpServer4.passDns: true
+        config.wifi.master.securityType: SECURITY_WPA2
+        config.wifi.master.ssid: $SERIAL-NUMBER
+        config.wifi.master.passphrase: $WIFI_PASSWORD
+        config.wifi.master.pairwiseCiphers: $WPA_PAIRWISE
+        config.wifi.master.radioMode: RADIO_MODE_80211$WIFI_MODE
+        config.ip4.address: 172.16.1.1
+        config.dhcpServer4.rangeStart: 172.16.1.100
+        config.dhcpServer4.rangeEnd: 172.16.1.115
+        
+#
+#   Modem/GPS service
+#
+# activated when a modem is detected
+#
+#  Global variable created by the modem_gps service
+#
+#   MODEM_MFG   name of the manufacturer
+#   MODEM_MODEL model name
+#   MODEM_IMEI
+#   MODEM_SIM_IN    true if a SIM is present, false otherwise
+#
+
+- service:
+    type: ModemGps
+    name: modem_gps
+    state: auto
+    parameters:
+        system: modem_gps
+        port: 20231
+        address: 0.0.0.0
+        modem_ctrl: /dev/ttyUSB2
+        nmea_tty: /dev/ttyUSB1
+        trace: info
+        PIN: '0000' # this for example - the PIN is used only if the SIM card request it
+        roaming: true
+        operatorsDB: 'operatorsDB'
+        start_gps: false
+#
+#   For continuity Wirepas and Bluetooth services are declared in interactive mode
+#
+#
+#   hci0 on TI WL1831 on internal interface
+#   to be configured via Kura
+#      
+- service:
+    type: BluetoothService
+    name: hci0
+    state: interactive
+    parameters:
+        configuration: BLEConfigurationService
+        plugin: BLEConfigurationService.dp
+        plugin_name: BLEConfigurationService
+        system: bleTransport
+        gatewayID: device
+        interface: $service_name
+        port: internal
+        max_connect: 10
+        notif_mtu: 63
+        trace: info
+        debug_bluez: false
+    variables:
+        ADDRESS: 127.0.0.1
+        PORT: 1883
+        USER: ""
+        PASSWORD: ""
+        FILTERS: ""
+        SCAN: ""
+    properties:
+        transport.enabled: false
+        transport.address: $ADDRESS
+        transport.port: $PORT
+        transport.user: $USER
+        transport.passwd: $PASSWORD
+        transport.filters: ""
+        transport.scan: ""
+#
+#  Wirepas with sink1 and sink2 interactive
+#        
+- service:
+    type: WirepasSink
+    name: sink1
+    state: interactive
+    parameters:
+        configuration: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasSink1
+        port: ttymxc1       # physical port
+        
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 0
+        ADDRESS: 1
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+
+- service:
+    type: WirepasSink
+    name: sink2
+    state: interactive
+    parameters:
+        configuration: WirepasSinkConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService 
+        system: wirepasSink2
+        port: ttymxc2
+        
+    variables:
+        NETWORK_ID: 10450204
+        NETWORK_CHANNEL: 0
+        ADDRESS: 2
+    properties:
+        sinkAddress: $ADDRESS
+        networkChannel: $NETWORK_CHANNEL
+        networkAddress: $NETWORK_ID
+        sinkName: $service_name
+        
+- service:
+    type: WirepasTransport
+    name: wirepas-cloud
+    state: interactive
+    parameters:
+        configuration: WirepasConfigurationService
+        plugin: WirepasConfigurationService.dp
+        plugin_name: WirepasConfigurationService
+        system: wirepasTransport1
+        prefix: transportA
+        # customId:
+    variables:
+        ENABLE: True
+        SECURE: True
+        ADDRESS: YOUR_BROKER_URL
+        PORT: 8883
+        USER: YOUR_BROKER_USER
+        PASSWORD: YOUR_BROKER_PASSWD
+    properties:
+        enabled: $ENABLE
+        secured: $SECURE
+        address: $ADDRESS
+        user: $USER
+        port: $PORT
+        passwd: $PASSWORD
