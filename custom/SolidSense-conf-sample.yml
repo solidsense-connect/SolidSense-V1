@@ -56,29 +56,17 @@ services:
     type: PppService
     name: ppp0
     state: active
-    override: true
-    parameters:
-        configuration: NetworkConfigurationService
-        prefix: net.interface.$service_name
+    override: false
     variables:
         APN: orange
         APN_AUTH: PAP
         APN_USER: orange
         APN_PASSWORD: orange
-        DIAL_STRING: atd*99***#
     properties:
         config.apn: $APN
         config.authType: $APN_AUTH
-        config.identifier: $MODEM_MODEL
         config.username: $APN_USER
         config.password: $APN_PASSWORD
-        config.dialString: $DIAL_STRING
-        config.ip4.status: netIPv4StatusEnabledWAN
-        config.dhcpClient4.enabled: true
-        config.enabled: true
-        config.autoconnect: true
-        usb.product.name: $MODEM_MODEL
-        usb.vendor.name: $MODEM_MFG
 #
 # Ethernet as LAN for ppp as WAN
 #        
@@ -109,38 +97,18 @@ services:
     variables:
         NETWORK_ID: 10450204
         NETWORK_CHANNEL: 10
-        ADDRESS: 2
+        ADDRESS: $UNIQUE_ADDRESS0
     properties:
         sinkAddress: $ADDRESS
         networkChannel: $NETWORK_CHANNEL
         networkAddress: $NETWORK_ID
         sinkName: $service_name
 
-- service:
-    type: WirepasSink
-    name: sink2
-    state: disabled
-    parameters:
-        configuration: WirepasSinkConfigurationService
-        plugin: WirepasConfigurationService.dp
-        plugin_name: WirepasConfigurationService 
-        system: wirepasSink2
-        port: ttymxc2
-        
-    variables:
-        NETWORK_ID: 10450204
-        NETWORK_CHANNEL: 10
-        ADDRESS: 4
-    properties:
-        sinkAddress: $ADDRESS
-        networkChannel: $NETWORK_CHANNEL
-        networkAddress: $NETWORK_ID
-        sinkName: $service_name
         
 - service:
     type: WirepasTransport
     name: wirepas-cloud
-    state: interactive
+    state: enable
     parameters:
         configuration: WirepasConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -150,11 +118,11 @@ services:
         # customId:
     variables:
         ENABLE: True
-        SECURE: True
-        ADDRESS: YOUR_BROKER_URL
-        PORT: 8883
-        USER: YOUR_BROKER_USER
-        PASSWORD: YOUR_BROKER_PASSWD
+        SECURE: False
+        ADDRESS: $MQTT_BROKER
+        PORT: 1883
+        USER: $MQTT_USER
+        PASSWORD: $MQTT_PASSWORD
     properties:
         enabled: $ENABLE
         secured: $SECURE
@@ -197,7 +165,7 @@ services:
 - service:
     type: BluetoothService
     name: hci1
-    state: auto
+    state: enable
     parameters:
         configuration: BLEConfigurationService
         plugin: BLEConfigurationService.dp
@@ -210,11 +178,12 @@ services:
         notif_mtu: 63
         trace: info
         debug_bluez: false
+        customID: BLE-$SERIAL-NUMBER
     variables:
         ENABLE: True
         SECURE: false
         ADDRESS: YOUR_BROKER_URL
-        PORT: 8883
+        PORT: 1883
         USER: YOUR_BROKER_USER
         PASSWORD: YOUR_BROKER_PASSWD
         FILTERS: ""

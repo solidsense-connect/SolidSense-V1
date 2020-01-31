@@ -139,6 +139,37 @@ services:
         config.ip4.address: 172.16.1.1
         config.dhcpServer4.rangeStart: 172.16.1.100
         config.dhcpServer4.rangeEnd: 172.16.1.115
+#
+#  ppp0 basic configuration
+#
+- service:
+    type: PppService
+    name: ppp0
+    state: disable
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    variables:
+        APN: None
+        APN_AUTH: None
+        APN_USER: 
+        APN_PASSWORD:
+        DIAL_STRING: atd*99***#
+    properties:
+        config.apn: $APN
+        config.authType: $APN_AUTH
+        config.identifier: $MODEM_MODEL
+        config.username: $APN_USER
+        config.password: $APN_PASSWORD
+        config.dialString: $DIAL_STRING
+        config.ip4.status: netIPv4StatusEnabledWAN
+        config.dhcpClient4.enabled: true
+        config.enabled: true
+        config.autoconnect: true
+        usb.product.name: $MODEM_MODEL
+        usb.vendor.name: $MODEM_MFG
+        model: $MODEM_MODEL
+        manufacturer: $MODEM_MFG
         
 #
 #   Modem/GPS service

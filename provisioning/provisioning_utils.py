@@ -37,8 +37,16 @@ def systemCtl(action, service):
 def checkCreateDir(dir) :
     if isWindows() :
         return
-    if not os.path.lexists(dir):
+    if os.path.lexists(dir):
+        # ok the file exist
+        if not os.path.isdir(dir) :
+            # normal file need to remove it
+            os.remove(dir)
+            os.mkdir(dir)
+    else:
         os.mkdir(dir)
+    # adjust mode in all cases
+    os.chmod(dir,0o777)
 
 def write_header(fd):
     t=datetime.datetime.now()
