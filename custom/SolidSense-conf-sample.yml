@@ -108,7 +108,7 @@ services:
 - service:
     type: WirepasTransport
     name: wirepas-cloud
-    state: enable
+    state: active
     parameters:
         configuration: WirepasConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -165,7 +165,7 @@ services:
 - service:
     type: BluetoothService
     name: hci1
-    state: enable
+    state: active
     parameters:
         configuration: BLEConfigurationService
         plugin: BLEConfigurationService.dp

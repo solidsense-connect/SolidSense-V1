@@ -141,6 +141,7 @@ class GlobalKuraConfig:
         self._id=0
         if rank > 2047 :
             servlog.error("Overflow on rank in week")
+            rank=2047
             return
         self._id=rank
         # now add the week
@@ -161,7 +162,7 @@ class GlobalKuraConfig:
         try:
             value=self._variables[key]
         except KeyError :
-            servlog.error("variable not defined:"+key)
+            servlog.info("variable not defined:"+key)
             value=default
         return value
 
@@ -546,8 +547,11 @@ def main():
     else:
         loghandler=logging.StreamHandler()
 
+    logformat= logging.Formatter("%(asctime)s | [%(levelname)s] %(message)s")
+    loghandler.setFormatter(logformat)
     servlog.addHandler(loghandler)
-    servlog.setLevel(logging.INFO)
+    servlog.setLevel(logging.DEBUG)
+
 
     servlog.info('*******Starting gateway provisioning process***********')
     loghandler.flush()

@@ -139,13 +139,41 @@ services:
         config.ip4.address: 172.16.1.1
         config.dhcpServer4.rangeStart: 172.16.1.100
         config.dhcpServer4.rangeEnd: 172.16.1.115
+
+#
+#   Modem/GPS service
+#
+# activated when a modem is detected
+#
+#  Global variable created by the modem_gps service
+#
+#   MODEM_MFG   name of the manufacturer
+#   MODEM_MODEL model name
+#   MODEM_IMEI
+#   MODEM_SIM_IN    true if a SIM is present, false otherwise
+#
+- service:
+    type: ModemGps
+    name: modem_gps
+    state: auto
+    parameters:
+        system: modem_gps
+        port: 20231
+        address: 0.0.0.0
+        modem_ctrl: /dev/ttyUSB2
+        nmea_tty: /dev/ttyUSB1
+        trace: info
+        PIN: '0000' # this for example - the PIN is used only if the SIM card request it
+        roaming: true
+        operatorsDB: 'operatorsDB'
+        start_gps: false
 #
 #  ppp0 basic configuration
-#
+# 
 - service:
     type: PppService
     name: ppp0
-    state: disable
+    state: disabled
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
@@ -171,34 +199,7 @@ services:
         model: $MODEM_MODEL
         manufacturer: $MODEM_MFG
         
-#
-#   Modem/GPS service
-#
-# activated when a modem is detected
-#
-#  Global variable created by the modem_gps service
-#
-#   MODEM_MFG   name of the manufacturer
-#   MODEM_MODEL model name
-#   MODEM_IMEI
-#   MODEM_SIM_IN    true if a SIM is present, false otherwise
-#
 
-- service:
-    type: ModemGps
-    name: modem_gps
-    state: auto
-    parameters:
-        system: modem_gps
-        port: 20231
-        address: 0.0.0.0
-        modem_ctrl: /dev/ttyUSB2
-        nmea_tty: /dev/ttyUSB1
-        trace: info
-        PIN: '0000' # this for example - the PIN is used only if the SIM card request it
-        roaming: true
-        operatorsDB: 'operatorsDB'
-        start_gps: false
 #
 #   For continuity Wirepas and Bluetooth services are declared in interactive mode
 #
@@ -243,7 +244,7 @@ services:
 - service:
     type: WirepasSink
     name: sink1
-    state: interactive
+    state: disabled
     parameters:
         configuration: WirepasSinkConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -264,7 +265,7 @@ services:
 - service:
     type: WirepasSink
     name: sink2
-    state: interactive
+    state: disabled
     parameters:
         configuration: WirepasSinkConfigurationService
         plugin: WirepasConfigurationService.dp
@@ -285,7 +286,7 @@ services:
 - service:
     type: WirepasTransport
     name: wirepas-cloud
-    state: interactive
+    state: disabled
     parameters:
         configuration: WirepasConfigurationService
         plugin: WirepasConfigurationService.dp

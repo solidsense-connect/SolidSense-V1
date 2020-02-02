@@ -28,7 +28,11 @@ def systemCtl(action, service):
     args.append(action)
     args.append(service)
     servlog.info('Executing:'+str(args))
-    c=subprocess.run(args,stderr=sys.stderr)
+    try:
+        c=subprocess.run(args,stderr=sys.stderr)
+    except Exception as e:
+        servlog.error("Systemctl error:"+str(e))
+        return -1
     servlog.info('result:'+str(c))
     return c.returncode
 
@@ -47,6 +51,13 @@ def checkCreateDir(dir) :
         os.mkdir(dir)
     # adjust mode in all cases
     os.chmod(dir,0o777)
+
+def checkAndRemoveFile(dir,file):
+    if os.path.lexists(dir):
+        path=os.path.join(dir,file)
+        if os.path.lexists(path):
+            os.remove(path)
+
 
 def write_header(fd):
     t=datetime.datetime.now()
