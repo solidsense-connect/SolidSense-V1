@@ -26,9 +26,13 @@ class PppService(NetworkService):
 
     def __init__(self,kura_config,def_dict):
         NetworkService.__init__(self,kura_config,def_dict)
-        modem=kura_config.get_service('modem_gps')
+
+
+
+    def configuration(self):
+        modem=self._kura_config.get_service('modem_gps')
         if modem == None:
-            self._state='disabled'
+            self._state=state_DISABLED
             loclog.error("Ppp Service => No supporting modem service")
             self._valid = False
         else:
@@ -36,15 +40,17 @@ class PppService(NetworkService):
             if not self._valid :
                 loclog.error('Ppp Service => No valid modem')
 
-
-
-    def configuration(self):
         if not self._valid :
             return
-        if self._state == 'disabled':
+        if self._state == state_DISABLED :
             return
         NetworkService.configuration(self)
         kura_id=self._kura_config.get_variable('MODEM_KURAID')
+        # check that we have an APN
+        apn=self.variableValue("APN")
+        if apn == None or len(apn) < 2 :
+            loclog.error("Invalid APN - ppp not configured -APN="+str(apn))
+            return
         #
         #  generations of the files
         #
@@ -148,8 +154,8 @@ class ModemGps(SolidSenseService):
             kura_config.set_variable('MODEM_SIM_IN',modem.SIM_Present())
             kura_config.set_variable('MODEM_KURAID',modem_kura_id)
             self._valid= True
-            if self._state == 'auto' :
-                self._state = 'active'
+            if self._state == state_AUTO :
+                self._state = state_ACTIVE
 
 
 
@@ -159,7 +165,7 @@ class ModemGps(SolidSenseService):
 
 
     def configuration(self):
-        if self._state == 'active' and self._valid :
+        if self._state == state_ACTIVE and self._valid :
             self._parameters['start_gps_service']= True
         else:
             self._parameters['start_gps_service']= False
@@ -180,7 +186,7 @@ class ModemGps(SolidSenseService):
         fd.close()
 
     def startService(self):
-        if self._state == 'active' :
+        if self._state == state_ACTIVE :
             servlog.info('Systemd activation for: '+self._name)
             systemCtl('enable',self._system_serv)
             systemCtl('start',self._system_serv)

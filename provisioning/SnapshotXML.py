@@ -167,7 +167,7 @@ class SnapshotProperty:
         self._encrypted=False
         self._prop_xml=ET.SubElement(parent,esf_tag('property'),attrib)
         self._value_xml=ET.SubElement(self._prop_xml,esf_tag('value'))
-        self._value_xml.text=str(value)
+        self.setvalue(value)
         self._value_xml.tail='\n'
         self._prop_xml.tail='\n'
 
@@ -183,6 +183,8 @@ class SnapshotProperty:
             # remove enryption key
             self._prop_xml.set('encrypted','false')
             self._encrypted = False
+        if type(value) == bool :
+            value = bool2str (value)
         self._value_xml.text=str(value)
 
     def write_simple(self,fd):
