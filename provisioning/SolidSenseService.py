@@ -23,13 +23,16 @@ state_ACTIVE='active'
 state_AUTO='auto'
 state_INTERACTIVE='interactive'
 
+services_States={state_DISABLED: False, state_INTERACTIVE: False, state_AUTO: True, state_ACTIVE: True}
+
 class SolidSenseService:
 
     def __init__(self,kura_config,def_dict):
 
         self._name=def_dict.get('name','**No name**')
         self._kura_config=kura_config
-        self._state=def_dict.get('state',state_DISABLED)
+
+        self.validate_state(def_dict)
         self._parameters=def_dict.get('parameters',{})
         self._variables=def_dict.get('variables')
         if self._variables == None :
@@ -39,6 +42,14 @@ class SolidSenseService:
             self._properties={}
 
         self._variables['service_name']=self._name
+
+    def validate_state(self,def_dict):
+            self._state=def_dict.get('state',state_DISABLED)
+            try:
+                val=services_States[self._state]
+            except KeyError :
+                servlog.error("Service "+self._name+ " Invalid state")
+                self._state=state_DISABLED
 
     def name(self):
         return self._name
@@ -59,8 +70,8 @@ class SolidSenseService:
             for key,value in dict2.items():
                 dict1[key]=value
 
-        merge_dict(self._parameters,def_dict.get('variables',None))
-        merge_dict(self._variables,def_dict.get('parameters',None))
+        merge_dict(self._parameters,def_dict.get('parameters',None))
+        merge_dict(self._variables,def_dict.get('variables',None))
         merge_dict(self._properties,def_dict.get('properties',None))
 
 
@@ -119,7 +130,7 @@ class SolidSenseService:
 
             except TypeError :
                 servlog.error("Error processing value:"+value)
-                print("var_s=",var_s,"var_v=",var_v)
+                # print("var_s=",var_s,"var_v=",var_v)
                 return None
 
             return res
@@ -164,10 +175,8 @@ class KuraService(SolidSenseService) :
         for p in self._properties.items():
             name=self.propertyName(p[0])
             value=self.checkAndReplaceVar(p[1])
-            # print ('property:',name,"=",value)
+            servlog.debug (' Configure property:'+self._name+"."+name+"="+str(value))
             self._snapconf.set_property(name,value)
-
-
 
 
 
@@ -229,6 +238,7 @@ class WirepasSink(KuraService):
 
     def configuration(self):
         if self._state == state_DISABLED :
+            checkAndRemoveFile(WirepasDataDir,"wirepasSinkConfig.service.cfg")
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
@@ -258,7 +268,7 @@ class WirepasSink(KuraService):
         fd.close
 
     def startService(self):
-        # print('starting sink service:',self._name," ",self._state)
+        servlog.debug('starting sink service:'+self._name+" "+self._state)
         if self._state == state_ACTIVE:
             servlog.info('Systemd activation for: '+self._name)
             systemCtl('enable',self._syst_service)
@@ -279,11 +289,13 @@ class WirepasTransport(KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
+        self._service=self.parameterValue('system')
         if self._state == state_DISABLED :
+            checkAndRemoveFile(WirepasDataDir,self._service+'.service.cfg')
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
-        self._service=self.parameterValue('system')
+
         plugin= self.parameterValue('plugin')
         plugin_name= self.parameterValue('plugin_name')
 
@@ -344,6 +356,7 @@ class WirepasMicroService(KuraService):
 
     def configuration(self):
         if self._state == state_DISABLED :
+            checkAndRemoveFile(WirepasDataDir,self._service+'.service.cfg')
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
@@ -380,11 +393,13 @@ class BluetoothService (KuraService):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
+        self._service=self.parameterValue('system')
         if self._state == state_DISABLED :
+            checkAndRemoveFile(BluetoothDataDir,self._service+'.service.cfg')
             return
         KuraService.configuration(self)
         checkCreateDir(BluetoothDataDir)
-        self._service=self.parameterValue('system')
+
         plugin= self.parameterValue('plugin')
         plugin_name= self.parameterValue('plugin_name')
 
@@ -429,19 +444,20 @@ class BluetoothService (KuraService):
 
     def startService(self):
         # now activate the services for hci1 and hci2
-
-        interface=self.parameterValue('port')
-        if interface == None: return
-        if interface == 'ttymxc1':
-            systemCtl('enable','ble1')
-            systemCtl('start','ble1')
-        elif interface == 'ttymxc2':
-            systemCtl('enable','ble2')
-            systemCtl('start','ble2')
-        elif interface == 'internal' :
-            pass
-        else:
-            servlog.error("Bluetooth transport - unknown port:"+interface)
+        servlog.debug('starting Bluetooth service:'+self._name+" "+self._state)
+        if self._state == state_ACTIVE:
+            interface=self.parameterValue('port')
+            if interface == None: return
+            if interface == 'ttymxc1':
+                systemCtl('enable','ble1')
+                systemCtl('start','ble1')
+            elif interface == 'ttymxc2':
+                systemCtl('enable','ble2')
+                systemCtl('start','ble2')
+            elif interface == 'internal' :
+                pass
+            else:
+                servlog.error("Bluetooth transport - unknown port:"+interface)
 
 
     def gen_transport_conf(self):

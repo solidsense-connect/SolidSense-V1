@@ -1130,6 +1130,12 @@
             <esf:property array="false" encrypted="false" name="transportB.port" type="Integer">
                 <esf:value>1883</esf:value>
             </esf:property>
+			<esf:property array="false" encrypted="false" name="transportA.options" type="String">
+			<esf:value></esf:value>
+			</esf:property>
+				<esf:property array="false" encrypted="false" name="transportB.options" type="String">
+					<esf:value></esf:value>
+			</esf:property>
         </esf:properties>
     </esf:configuration>
 </esf:configurations>
