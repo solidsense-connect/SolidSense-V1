@@ -5,8 +5,6 @@ Requires=getty.target
 [Service]
 Type=simple
 User=solidsense
-ExecStartPre=/bin/wp-get-fw-version /dev/ttymxc1
-ExecStartPre=/bin/sleep 1
 ExecStart=/opt/SolidSense/bin/sinkService -b 125000 -p /dev/ttymxc1 -i 1
 Restart=on-abnormal
 RestartSec=6
