@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+WM_DEBUG_LEVEL=debug
+export WM_DEBUG_LEVEL
+/usr/bin/wm-gw-test $1
