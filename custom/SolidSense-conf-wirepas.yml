@@ -38,6 +38,9 @@
 gateway:
 
     snapshot_0: snapshot_0-full.xml #this is the template snapshot do not change it unless full test
+    WP_TEST_ID: 10450204
+    WP_TEST_CHANNEL: 10
+    
     
     
 #######################################################
@@ -62,9 +65,9 @@ services:
         port: ttymxc1       # physical port
         
     variables:
-        NETWORK_ID: YOUR_ID
-        NETWORK_CHANNEL: YOUR_CHANNEL
-        ADDRESS: YOUR_ADDRESS
+        NETWORK_ID: $WP_TEST_ID
+        NETWORK_CHANNEL: $WP_TEST_CHANNEL
+        ADDRESS: $UNIQUE_ADDRESS0
     properties:
         sinkAddress: $ADDRESS
         networkChannel: $NETWORK_CHANNEL
@@ -83,9 +86,9 @@ services:
         port: ttymxc2
         
     variables:
-        NETWORK_ID: YOUR_ID
-        NETWORK_CHANNEL: YOUR_CHANNEL
-        ADDRESS: YOUR_ADDRESS
+        NETWORK_ID: $WP_TEST_ID
+        NETWORK_CHANNEL: $WP_TEST_CHANNEL
+        ADDRESS: $UNIQUE_ADDRESS1
     properties:
         sinkAddress: $ADDRESS
         networkChannel: $NETWORK_CHANNEL
