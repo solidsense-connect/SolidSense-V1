@@ -147,7 +147,11 @@ class ModemGps(SolidSenseService):
             #
             #  now get the parameters
             #
-            modem_kura_id=modem.model()+"_2-1.2"
+            if kura_config.isOutdoor() :
+                modem_kura_id=modem.model()+"_2-1"
+            else:
+                modem_kura_id=modem.model()+"_2-1.2"
+
             kura_config.set_variable('MODEM_MFG',modem.manufacturer())
             kura_config.set_variable('MODEM_MODEL',modem.model())
             kura_config.set_variable('MODEM_IMEI',modem.IMEI())
