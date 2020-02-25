@@ -78,6 +78,15 @@ class GlobalKuraConfig:
                 self._prodid = ls[1].strip()
         fd.close()
         self._model = (self._partnum.split('.'))[0]
+        num_model=int(self._model[3:])
+        if num_model > 100 :
+            servlog.info("Outdoor gateway detected")
+            self._outdoor = True
+        else:
+            self._outdoor = False
+
+    def isOutdoor(self):
+        return self._outdoor
 
     def mender_conf(self):
         fd=open("/etc/mender/artifact_info","r")
