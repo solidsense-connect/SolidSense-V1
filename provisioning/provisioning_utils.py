@@ -78,6 +78,51 @@ def bool2str(b):
     else :
         return 'false'
 
+def findUsbModem(mfg):
+    '''
+    Look on the USB system and detect the modem from the manufacturer
+    '''
+    r=subprocess.run('lsusb',capture_output=True)
+    lines=r.stdout.decode('utf-8').split('\n')
+    found_modem=False
+    for line in lines :
+        if len(line) > 0 :
+            print(line)
+            if line.find(mfg)  > 0 :
+                t=line.split(' ')
+                bus=int(t[1])
+                dev=int(t[3].rstrip(':'))
+                ids=t[5].split(':')
+                found_modem=True
+                break
+    if found_modem :
+        out={}
+        # check the device path
+        r=subprocess.run("ls /sys/bus/usb/drivers/option/ | head -n1 | cut -f1 -d':'",capture_output=True,shell=True)
+        dev_path=r.stdout.decode('utf-8').rstrip('\n')
+        servlog.info("Found "+mfg+" modem on USB bus "+str(bus)+" device "+str(dev)+' Device path:'+dev_path)
+        out['bus']=bus
+        out['dev'] = dev
+        out['mfgid']=ids[0]
+        out['modelid'] = ids[1]
+        out['dev_path'] = dev_path
+        return out
+    else:
+        servlog.error('No '+mfg+' modem found')
+        return None
+
+def checkWirepasSink(tty,sink):
+
+    r=subprocess.run(['wp-get-fw-version',tty],capture_output=True)
+    if r.returncode != 0 :
+        servlog.info('No Wirepas firmware running on:'+ sink)
+        servlog.info(r.stderr.decode('utf-8').rstrip('\n'))
+        return False
+    else:
+        lines=r.stdout.decode('utf-8').split('\n')
+        servlog.info(lines[3])
+        return True
+
 
 def main():
     pass
