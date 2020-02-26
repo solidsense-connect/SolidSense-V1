@@ -87,7 +87,7 @@ def findUsbModem(mfg):
     found_modem=False
     for line in lines :
         if len(line) > 0 :
-            print(line)
+            # print(line)
             if line.find(mfg)  > 0 :
                 t=line.split(' ')
                 bus=int(t[1])

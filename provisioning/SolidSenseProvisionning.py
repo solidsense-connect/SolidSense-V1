@@ -358,7 +358,7 @@ class GlobalKuraConfig:
         # print("ADDRESS0: %08X"%addrb)
         self.set_variable('UNIQUE_ADDRESS0',addrb)
         self.set_variable('UNIQUE_ADDRESS1',addrb+1)
-        self.set_variable('AUTO_PASSWORD','__'+self._sernum+'__')
+        self.set_variable('AUTO_PASSWORD','_%_'+self._sernum[5:]+'#;.&"%')
 
 
     def dump_variables(self):
@@ -575,7 +575,7 @@ def main():
     # now check if we a custom configuration file
     custom_file = 'SolidSense-conf-custom.yml'
     cust_file=os.path.join(custom_dir,custom_file)
-    servlog.info("REading custom configuration file:"+cust_file)
+    servlog.info("Reading custom configuration file:"+cust_file)
     if read_service_def(kgc,cust_file) :
         servlog.info("Error in custom configuration file")
     # generate secondary global variables

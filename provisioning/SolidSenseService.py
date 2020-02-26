@@ -119,10 +119,22 @@ class SolidSenseService:
         var_s= value.find('$')
         if var_s != -1 :
             # that is a variable that needs to be dereferenced
-            var_v= self.variableValue(value[var_s+1:])
+            i=var_s+1
+            for c in value[var_s+1:] :
+                if c.isalnum() or c in '.-_' :
+                    i += 1
+                else:
+                    break
+            vt=value[var_s+1:i]
+            end=value[i:]
+
+
+            var_v= self.variableValue(vt)
+            # print("Variable=",vt,"end=",end,"val=",var_v)
+
             try:
                 if type(var_v)  ==str :
-                    res=value[:var_s]+var_v
+                    res=value[:var_s]+var_v+end
                 elif len(value[:var_s]) == 0:
                     res=var_v
                 else:
