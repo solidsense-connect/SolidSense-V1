@@ -242,6 +242,17 @@ class WirepasSink(KuraService):
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
+        # now check that we have a valid Wirepas sink
+        port=self.parameterValue('port')
+        if port == None :
+            servlog.critical('Cannot check Wirepas sink => Configuring anyway but may lead to disfunctional system ')
+        else:
+            dev_port=os.path.join('/dev',port)
+            if not checkWirepasSink(dev_port,self._name):
+                self._state= state_DISABLED
+                return
+            servlog.info("Wirepas firmware found on "+self._name)
+
         # mandatory setup
         try:
             self._syst_service= self._parameters['system']

@@ -18,6 +18,7 @@ import stat
 
 from SolidSenseService import *
 from QuectelAT_Service import *
+from provisioning_utils import *
 
 loclog=logging.getLogger('SolidSense-provisioning')
 
@@ -127,6 +128,11 @@ class ModemGps(SolidSenseService):
             self._valid=True
             kura_config.set_variable('MODEM_KURAID',"EC25_2-1.2")
         else:
+            mdm_usb=findUsbModem('Quectel')
+            if mdm_usb == None :
+                self._valid=False
+                return
+
             tty1=self.parameterValue('modem_ctrl')
             if not os.path.exists(tty1) :
                 loclog.error('Modem service => TTY control file not existing:'+tty1)
@@ -147,10 +153,8 @@ class ModemGps(SolidSenseService):
             #
             #  now get the parameters
             #
-            if kura_config.isOutdoor() :
-                modem_kura_id=modem.model()+"_2-1"
-            else:
-                modem_kura_id=modem.model()+"_2-1.2"
+
+            modem_kura_id=modem.model()+"_"+mdm_usb['dev_path']
 
             kura_config.set_variable('MODEM_MFG',modem.manufacturer())
             kura_config.set_variable('MODEM_MODEL',modem.model())
