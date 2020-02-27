@@ -2,7 +2,7 @@
 
 # global variables
 REPOS=" \
-	github.com/SolidRun/SolidSense-V1.git;branch=V0.951;protocol=https:/var/www/images.solidsense.io/.git/SolidSense-V1 \
+	github.com/SolidRun/SolidSense-V1.git;branch=master;protocol=https:/var/www/images.solidsense.io/.git/SolidSense-V1 \
 "
 
 DIR_MAPPINGS=" \
@@ -75,6 +75,11 @@ handle_linking () {
 			for file in "${srcdir}"/"${repo_subdir}"/*; do
 				srcfile="${file}"
 				dstfile="${dstdir}/$(basename "${file}")"
+				# Check if file differs and delete dstfile if they do
+				if ! cmp -s "${srcfile}" "${dstfile}"; then
+					rm "${dstfile}"
+				fi
+				# Check if the file exists
 				if [ ! -f "${dstfile}" ]; then
 					ln "${srcfile}" "${dstfile}"
 				fi
