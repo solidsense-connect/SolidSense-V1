@@ -142,7 +142,8 @@ class GlobalKuraConfig:
         Generate a unique ID on 19 bits
         serial in week => 11 bits
         week number => 6 bits
-        year (2 bits) => 2018 => 00 2020 => 01 2021 => 11
+        year (2 bits) => 2019 => 00 2020 => 01 2021 => 10 2022 => 11
+        2018 => internal test gateways only
         '''
         year=int(self._sernum[2:4])
         week=int(self._sernum[4:6])
@@ -155,7 +156,14 @@ class GlobalKuraConfig:
         self._id=rank
         # now add the week
         self._id += week << 11
-        year_code= year - 18
+        if year >= 19 and year <= 22 :
+            year_code= year - 19
+        elif year == 18 :
+            year_code=0 # map into 2019 but that is no issue
+        else:
+            servlog.critical("Invalid year code")
+            year_code=3
+
         self._id += year_code << 17
         # print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
 
@@ -574,10 +582,27 @@ def main():
         return
     # now check if we a custom configuration file
     custom_file = 'SolidSense-conf-custom.yml'
+    '''
+    Application of the custome file search algorithm (issue 497)
+    First search in   /data/solidsense/config
+    Then in /opt/SolidSense/config
+    '''
     cust_file=os.path.join(custom_dir,custom_file)
-    servlog.info("Reading custom configuration file:"+cust_file)
-    if read_service_def(kgc,cust_file) :
-        servlog.info("Error in custom configuration file")
+    # check existence
+    if not os.path.lexists(cust_file) :
+        # there is no file is the /data partition
+        servlog.debug("Custom configuration not existing:"+cust_file)
+        cust_file=os.path.join(config_dir,custom_file)
+        if not os.path.lexists(cust_file):
+            servlog.debug("Custom configuration not existing:"+cust_file)
+            cust_file=None
+
+    if cust_file != None :
+        servlog.info("Reading custom configuration file:"+cust_file)
+        if read_service_def(kgc,cust_file) :
+            servlog.info("Error in custom configuration file")
+    else:
+        servlog.info("No custom configuration file => proceeding with default")
     # generate secondary global variables
     kgc.gen_secondary_global()
     # trace the variables
