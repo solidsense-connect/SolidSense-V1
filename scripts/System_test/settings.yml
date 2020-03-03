@@ -1,0 +1,8 @@
+#
+#
+mqtt_hostname: 52.168.174.105
+mqtt_port: 1883
+mqtt_force_unsecure: true
+mqtt_username: mqtt-test
+mqtt_password: mqtt-test
+mqtt_subscribe_destination_endpoint: 10
