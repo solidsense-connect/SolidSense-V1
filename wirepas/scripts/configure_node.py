@@ -25,8 +25,6 @@ class SinkConfigurator(BusClient):
             local_log.error("Cannot retrieve sink object:"+sink_name)
             return
 
-        fmt="Wirepas sink configuration for sink:%s address:%d role:%d network:%d (%06X) channel:%d start:%s"
-        local_log.info(fmt%(sink_name,node_address,node_role,network_address,network_address,network_channel,start))
         # Do the actual configuration
         config = {}
         if node_address is not None:
@@ -40,10 +38,22 @@ class SinkConfigurator(BusClient):
         if start is not None:
             config["started"] = start
 
+        fmt="Requested Wirepas sink configuration for %s: %s"
+        local_log.info(fmt%(sink_name,config))
 
         ret = sink.write_config(config)
         local_log.info("Configuration done with result = {}".format(ret))
 
+
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main(log_name='configure_node'):
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
@@ -75,7 +85,7 @@ def main(log_name='configure_node'):
 
     parser.add_argument('-S',
                         '--start',
-                        type=bool,
+						type=str2bool,
                         help="Start the sink after configuration")
 
     args = parser.parse_args()
