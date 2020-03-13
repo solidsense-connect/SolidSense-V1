@@ -19,7 +19,7 @@ class SinkConfigurator(BusClient):
         super(SinkConfigurator, self).__init__(**kwargs)
 
 
-    def configure(self, sink_name, node_address, node_role, network_address, network_channel, start):
+    def configure(self, sink_name, node_address, node_role, network_address, network_channel, start, cypher, auth):
         sink = self.sink_manager.get_sink(sink_name)
         if sink is None:
             local_log.error("Cannot retrieve sink object:"+sink_name)
@@ -38,6 +38,18 @@ class SinkConfigurator(BusClient):
         if start is not None:
             config["started"] = start
 
+        if cypher is not None:
+            if len(cypher) != 16:
+                local_log.error("Bad cypher key size "+ str(len(cypher)))
+                return
+            config["cipher_key"] = cypher
+
+        if auth is not None:
+            if len(auth) != 16:
+                local_log.error("Bad authentication key size "+ str(len(auth)))
+                return
+            config["authentication_key"] = auth
+
         fmt="Requested Wirepas sink configuration for %s: %s"
         local_log.info(fmt%(sink_name,config))
 
@@ -54,6 +66,18 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def str2bytes(value):
+    """ Ensures string to bytes conversion """
+	# NOTE: eval() is not safe, but the input is provided by a local user, so it could be trusted
+    try:
+        res = eval(value)
+        if type(res) == bytes:
+            return res
+    except:
+        pass
+
+    raise argparse.ArgumentTypeError('Bytes value expected.')
 
 def main(log_name='configure_node'):
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
@@ -85,8 +109,18 @@ def main(log_name='configure_node'):
 
     parser.add_argument('-S',
                         '--start',
-						type=str2bool,
+                        type=str2bool,
                         help="Start the sink after configuration")
+
+    parser.add_argument('-C',
+                        '--cypher',
+                        type=str2bytes,
+                        help="Set Cypher Key")
+
+    parser.add_argument('-A',
+                        '--auth',
+                        type=str2bytes,
+                        help="Set Authentication Key")
 
     args = parser.parse_args()
 
@@ -98,7 +132,9 @@ def main(log_name='configure_node'):
         network_address=args.network_address,
         network_channel=args.network_channel,
         sink_name=args.sink_name,
-        start=args.start)
+        start=args.start,
+        cypher=args.cypher,
+        auth=args.auth)
 
 
 if __name__ == "__main__":
