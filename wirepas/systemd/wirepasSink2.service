@@ -1,14 +1,17 @@
 [Unit]
 Description=Wirepas sink manager for sink connected to /dev/ttymxc2
 Requires=getty.target
+StartLimitIntervalSec=180
+StartLimitBurst=5
 
 [Service]
 Type=simple
 User=solidsense
-ExecStartPre=/bin/wp-get-fw-version /dev/ttymxc2
+ExecStartPre=/bin/sink2-get-version /dev/ttymxc2
+ExecStartPre=/bin/sleep 1
 ExecStart=/opt/SolidSense/bin/sinkService -b 125000 -p /dev/ttymxc2 -i 2
-Restart=on-abnormal
-RestartSec=6
+Restart=always
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target
