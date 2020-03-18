@@ -81,6 +81,27 @@ class PppService(NetworkService):
             pass
 
         os.symlink(peer,port)
+
+        #
+        #  /etc/ppp/options file
+        #
+        outfile='/etc/ppp/options'
+        fd=open(outfile,'w')
+        loclog.info("Generating "+outfile)
+        fd.write('lock\n')
+        if self.asParameter('mtu') :
+            mtu=self.parameterValue('mtu')
+            try:
+                if mtu > 300 and mtu < 2500 :
+                    loclog.debug("mtu "+str(mtu))
+                    line="mtu %d\n" % mtu
+                    fd.write(line)
+                else:
+                    loclog.error("MTU size incorrect falling to default")
+            except (TypeError,ValueError) :
+                loclog.error("Wrong MTU, shall be integer")
+        fd.close()
+
         #
         #   create entry in secret files
         #
