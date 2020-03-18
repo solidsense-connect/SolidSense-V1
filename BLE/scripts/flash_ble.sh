@@ -3,7 +3,6 @@ OCD_CFG_FILE="$(mktemp /tmp/.openocd_cfg.XXXXX)"
 OCD_PID=""
 LOGFILE="$(mktemp /tmp/.openocd_log.XXXXX)"
 LOGFILE_CMD="$(mktemp /tmp/.openocd_log_cmd.XXXXX)"
-NC="$(command -vp nc)"
 
 openocd_create_cfg_file () {
 	cat > "${OCD_CFG_FILE}" << END
@@ -23,11 +22,7 @@ openocd_cmd () {
 	cmd="${1}"
 
 	echo -n "$(date): " >> "${LOGFILE_CMD}" 2>&1
-	if [ -z "${NC}" ]; then
-		(echo "${cmd}"; sleep 0.1) | telnet localhost 4444 >> "${LOGFILE_CMD}" 2>&1
-	else
-		echo "${cmd}" | nc localhost 4444 | tr -d '\000' >> "${LOGFILE_CMD}" 2>&1
-	fi
+	echo "${cmd}" | nc localhost 4444 | tr -d '\000' >> "${LOGFILE_CMD}" 2>&1
 	echo "" >> "${LOGFILE}" 2>&1
 }
 
@@ -45,11 +40,7 @@ openocd_check_busy_state () {
 }
 
 openocd_check_state () {
-	if [ -z "${NC}" ]; then
-		result=$( (echo "targets"; sleep 0.1) | telnet localhost 4444 | tr -d '\000')
-	else
-		result=$(echo "targets" | nc localhost 4444 | tr -d '\000')
-	fi
+	result=$(echo "targets" | nc localhost 4444 | tr -d '\000')
 	if echo "${result}" | grep -q halted; then
 		echo "Chip is ready for flashing, continuing..."
 	elif echo "${result}" | grep -q running; then
@@ -69,7 +60,7 @@ openocd_check_state () {
 
 		# Turn off ERASEALL bit
 		openocd_cmd "nrf52.dap apreg 1 0x04 0x00"
-
+		
 		# Undergo reset and halt chip
 		openocd_cmd "reset"
 		openocd_cmd "halt"
