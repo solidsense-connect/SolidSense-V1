@@ -36,6 +36,28 @@ def systemCtl(action, service):
     servlog.info('result:'+str(c))
     return c.returncode
 
+def readSinkStatus(service):
+    try:
+        proc=subprocess.Popen(['systemctl','status', service], stdout=subprocess.PIPE,encoding="utf-8")
+    except OSError as err:
+        servlog.critical(str(err))
+        return False
+
+    active=False
+
+    for line in proc.stdout :
+        # print (line)
+        # analyse
+        act=line.find("Active:")
+        if act > 0 :
+            start= act+len("Active:")
+            res=line[start:].split()
+            servlog.info("Service "+service+" "+res[0]+res[1])
+            if res[0] == 'active' and res[1] == '(running)':
+                active=True
+
+    proc.wait()
+    return active
 
 
 def checkCreateDir(dir) :
@@ -125,7 +147,11 @@ def checkWirepasSink(tty,sink):
 
 
 def main():
-    pass
+    # res=systemCtl(sys.argv[1],sys.argv[2])
+    res=readSinkStatus(sys.argv[2])
+    if res:
+        print("service",sys.argv[2],"is active")
+
 
 if __name__ == '__main__':
     main()

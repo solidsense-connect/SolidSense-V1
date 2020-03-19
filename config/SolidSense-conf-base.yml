@@ -167,7 +167,8 @@ services:
         roaming: true
         operatorsDB: 'operatorsDB'
         start_gps: false
-        timer: 300
+        timer: 60
+        nb_retry: 5
 #
 #  ppp0 basic configuration
 # 

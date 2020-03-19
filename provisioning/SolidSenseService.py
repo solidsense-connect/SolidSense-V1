@@ -254,16 +254,6 @@ class WirepasSink(KuraService):
             return
         KuraService.configuration(self)
         checkCreateDir(WirepasDataDir)
-        # now check that we have a valid Wirepas sink
-        port=self.parameterValue('port')
-        if port == None :
-            servlog.critical('Cannot check Wirepas sink => Configuring anyway but may lead to disfunctional system ')
-        else:
-            dev_port=os.path.join('/dev',port)
-            if not checkWirepasSink(dev_port,self._name):
-                self._state= state_DISABLED
-                return
-            servlog.info("Wirepas firmware found on "+self._name)
 
         # mandatory setup
         try:
@@ -274,6 +264,21 @@ class WirepasSink(KuraService):
             servlog.error('Wirepas Sink:'+self._name+' Missing parameters')
             return
         self._kura_config.add_plugin(plugin_name,plugin)
+
+        # now check that we have a valid Wirepas sink
+        if readSinkStatus(self._syst_service) :
+            servlog.info("Systemd service running:"+self._syst_service)
+        else:
+            port=self.parameterValue('port')
+            if port == None :
+                servlog.critical('Cannot check Wirepas sink => Configuring anyway but may lead to disfunctional system ')
+            else:
+                dev_port=os.path.join('/dev',port)
+                if not checkWirepasSink(dev_port,self._name):
+                    self._state= state_DISABLED
+                    return
+                servlog.info("Wirepas firmware found on "+self._name)
+
 
         # self.configSink()
         # sinks must be configured after starting the service
@@ -293,11 +298,12 @@ class WirepasSink(KuraService):
     def startService(self):
         servlog.debug('starting sink service:'+self._name+" "+self._state)
         if self._state == state_ACTIVE:
-            servlog.info('Systemd activation for: '+self._name)
-            systemCtl('enable',self._syst_service)
-            systemCtl('start',self._syst_service)
-            # wait to allow the system to start
-            time.sleep(1.0)
+            if readSinkStatus(self._syst_service) :
+                servlog.info('Systemd activation for: '+self._name)
+                systemCtl('enable',self._syst_service)
+                systemCtl('start',self._syst_service)
+                # wait to allow the system to start
+                time.sleep(1.0)
             self.configSink()
             systemCtl('start','wirepasSinkConfig')
 
