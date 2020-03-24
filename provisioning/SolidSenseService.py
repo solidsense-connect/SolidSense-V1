@@ -297,8 +297,10 @@ class WirepasSink(KuraService):
 
     def startService(self):
         servlog.debug('starting sink service:'+self._name+" "+self._state)
+        # issue 549 wrong test on service activity
         if self._state == state_ACTIVE:
-            if readSinkStatus(self._syst_service) :
+            if not readSinkStatus(self._syst_service) :
+                # we shall start the service as it is not active issue #549
                 servlog.info('Systemd activation for: '+self._name)
                 systemCtl('enable',self._syst_service)
                 systemCtl('start',self._syst_service)
