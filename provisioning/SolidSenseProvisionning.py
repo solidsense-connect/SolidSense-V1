@@ -461,7 +461,9 @@ services_class = {
     "WirepasSink": WirepasSink,
     "WirepasTransport": WirepasTransport,
     "WirepasMicroService": WirepasMicroService,
-    "BluetoothService": BluetoothService}
+    "BluetoothService": BluetoothService,
+    "MQTTService":MQTTService
+    }
 
 def read_service_def(kgc_o,serv_file):
     '''

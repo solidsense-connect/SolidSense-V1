@@ -415,21 +415,22 @@ class WirepasMicroService(KuraService):
 
 
 BluetoothDataDir='/data/solidsense/ble_gateway'
+MQTTDataDir='/data/solidsense/mqtt'
 
-class BluetoothService (KuraService):
+class MQTTService (KuraService):
     Transport_Cmd={"ADDRESS":"mqtt_hostname","PORT":"mqtt_port","USER":"mqtt_username","PASSWORD":"mqtt_password",
-    "FILTERS":"ble_filters","SCAN":"ble_scan"}
-    Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
+                    }
+    Default_Parameters= {'trace':'info'}
     def __init__(self,kura_config,def_dict):
         KuraService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
         self._service=self.parameterValue('system')
         if self._state == state_DISABLED :
-            checkAndRemoveFile(BluetoothDataDir,self._service+'.service.cfg')
+            checkAndRemoveFile(MQTTDataDir,self._service+'.service.cfg')
             return
         KuraService.configuration(self)
-        checkCreateDir(BluetoothDataDir)
+        checkCreateDir(MQTTDataDir)
 
         plugin= self.parameterValue('plugin')
         plugin_name= self.parameterValue('plugin_name')
@@ -455,6 +456,68 @@ class BluetoothService (KuraService):
             self._gwid=self.variableValue('SERIAL-NUMBER')
 
         self.gen_transport_conf()
+        # now generate the parameters.json
+        param={}
+        for key,value in  MQTTService.Default_Parameters.items():
+            if self.asParameter(key):
+                param[key]=self.parameterValue(key)
+            else:
+                param[key]=value
+        outdir=self._kura_config.output_dir(MQTTDataDir)
+        file=os.path.join(outdir,'parameters.json')
+        try:
+            fd=open(file,'w')
+        except IOError as err:
+            servlog.error("MQTT "+str(err))
+            return
+        json.dump(param,fd,indent=1)
+        fd.write('\n')
+        fd.close()
+
+    def startService(self):
+        # now activate the service
+        servlog.debug('starting MQTT service:'+self._name+" "+self._state)
+        if self._state != state_DISABLED:
+           systemCtl('enable',self._service)
+        if self._state == state_ACTIVE :
+            systemCtl('start',self._service)
+
+    def gen_transport_conf(self):
+        outdir=self._kura_config.output_dir(MQTTDataDir)
+        file=os.path.join(outdir,self._service+'.service.cfg')
+        try:
+            fd=open(file,'w')
+        except IOError as err:
+            servlog.error("Bluetooth transport - "+file+" :"+err)
+            return
+        write_header(fd)
+        sec= self.variableValue('SECURE')
+        if sec == None : sec = False
+        sec = not sec
+
+        fd.write('gateway_id: '+self._gwid+'\n')
+        fd.write('mqtt_force_unsecure: '+bool2str(sec)+'\n')
+
+        for c in MQTTService.Transport_Cmd.items():
+            fd.write(c[1])
+            fd.write(": ")
+            fd.write(str(self.variableValue(c[0])))
+            fd.write('\n')
+
+
+        fd.close()
+
+
+class BluetoothDervice(SolidSenseService):
+    Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
+    def __init__(self,kura_config,def_dict):
+        SolidSenseService.__init__(self,kura_config,def_dict)
+
+    def configuration(self):
+        self._service=self.parameterValue('system')
+
+        checkCreateDir(BluetoothDataDir)
+
         # now generate the parameters.json
         param={}
         for key,value in  BluetoothService.Default_Parameters.items():
@@ -488,33 +551,7 @@ class BluetoothService (KuraService):
             elif interface == 'internal' :
                 pass
             else:
-                servlog.error("Bluetooth transport - unknown port:"+interface)
-
-
-    def gen_transport_conf(self):
-        outdir=self._kura_config.output_dir(BluetoothDataDir)
-        file=os.path.join(outdir,self._service+'.service.cfg')
-        try:
-            fd=open(file,'w')
-        except IOError as err:
-            servlog.error("Bluetooth transport - "+file+" :"+err)
-            return
-        write_header(fd)
-        sec= self.variableValue('SECURE')
-        if sec == None : sec = False
-        sec = not sec
-
-        fd.write('gateway_id: '+self._gwid+'\n')
-        fd.write('mqtt_force_unsecure: '+bool2str(sec)+'\n')
-
-        for c in BluetoothService.Transport_Cmd.items():
-            fd.write(c[1])
-            fd.write(": ")
-            fd.write(str(self.variableValue(c[0])))
-            fd.write('\n')
-
-
-        fd.close()
+                servlog.error("Bluetooth service - unknown port:"+interface)
 
 
 def main():
