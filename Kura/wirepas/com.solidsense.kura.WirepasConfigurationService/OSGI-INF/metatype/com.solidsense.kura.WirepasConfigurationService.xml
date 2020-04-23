@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="com.solidsense.kura.WirepasConfigurationService"
+        name="Wirepas Data Configuration"
+        description="Configuration of the Wirepas MQTT transport modules">
+        
+        <Icon resource="OSGI-INF/icon.png" size="16"/>
+        
+        
+        <AD id="gatewayID"
+            name="Gateway ID"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="device" 
+            >
+            <Option label="Device Name"  value="device"/>
+            <Option label="Custom" value="custom"/>
+            <Option label="Automatic" value="auto"/>
+            
+        </AD>
+        <AD id="customID"
+            name="Gateway custom ID / Prefix"
+            type="String"
+            cardinality="0"
+            required="false" 
+            description="This custom ID can be used as a prefix if you use the device name"
+            >
+        </AD>
+
+        
+        <AD id="transportA.enabled"  
+            name="Main MQTT transport enabled"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable/Disable the Main MQTT transport service"/>
+
+        <AD id="transportA.secured"  
+            name="Main MQTT transport secure"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable TLS for the Main MQTT transport service"/>
+            
+        <AD id="transportA.persist"  
+            name="Main MQTT transport persistance mode"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable message buffering in the MQTT broker"/>
+
+        <AD id="transportA.address"
+            name="Main Broker address"
+            type="String"
+            required="false"
+            cardinality="0"
+            description="address of the MQTT broker"/>
+
+        <AD id="transportA.port"
+            name="Main Broker port"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="1883"
+            max="65536"
+            description="TCP port of the MQTT broker"/>
+
+        <AD id="transportA.user"
+            name="Main Broker username"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="username for the MQTT broker connexion"/>
+            
+       <AD id="transportA.passwd"
+            name="Main Broker password"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="password for the MQTT broker connexion"/>
+            
+       <AD id="transportA.maxpacket"
+            name="Maximum buffered packets (Black-Hole detection)"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            max="65536"
+            description="Maximum number of messages to buffer before rising sink cost (0 will disable Black-Hole detection)"/>
+		
+		<AD id="transportA.maxdelay"
+            name="Maximum delay without publish (Black-Hole detection)"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10"
+            max="65536"
+            description="Maximum time to wait in seconds without any successful publish with packet queued before rising sink cost (0 will disable feature)"/>            
+            
+
+		<AD id="transportA.options"
+            name="Additional parameters (Expert mode)"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="The list of additional parameters to add to the configuration file  (one per line, ex: mqtt_allow_untrusted: True).|TextArea"/>
+
+
+            
+        <AD id="transportB.enabled"  
+            name="Optional MQTT transport enabled"
+            type="Boolean"
+            required="true"
+            cardinality="0" 
+            default="false" 
+            description="Enable/Disable the Optional MQTT transport service"/>
+            
+        <AD id="transportB.secured"  
+            name="Optional MQTT transport secure"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable TLS for the Optional MQTT transport service"/>
+
+		<AD id="transportB.persist"  
+            name="Optional MQTT transport persistance mode"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable message buffering in the MQTT broker"/>            
+
+	   <AD id="transportB.address"
+            name="Optional Broker address"
+            type="String"
+            required="false"
+            cardinality="0"
+            description="address of the MQTT broker"/>
+
+        <AD id="transportB.port"
+            name="Optional Broker port"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="1883"
+            max="65536"
+            description="TCP port of the MQTT broker"/>
+
+        <AD id="transportB.user"
+            name="Optional Broker username"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="username for the MQTT broker connexion"/>
+            
+       <AD id="transportB.passwd"
+            name="Optional Broker password"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="password for the MQTT broker connexion"/>
+            
+       <AD id="transportB.options"
+            name="Additional parameters (Expert mode)"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="The list of additional parameters to add to the configuration file (one per line, ex: mqtt_allow_untrusted: True).|TextArea"/>
+            
+         
+         
+       <AD id="microService.enabled"  
+            name="Local Microservice enabled"
+            type="Boolean"
+            required="true"
+            cardinality="0" 
+            default="false" 
+            description="Enable/Disable the Local Microservice"/>   
+       
+       <AD id="microService.global"  
+            name="Local Microservice available from the network"
+            type="Boolean"
+            cardinality="0" 
+            default="false" 
+            description="If disabled, the Local Microservice is available only from the localhost interface"/>
+            
+            
+    </OCD>
+
+    <Designate pid="com.solidsense.kura.WirepasConfigurationService">
+        <Object ocdref="com.solidsense.kura.WirepasConfigurationService"/>
+    </Designate>
+</MetaData>

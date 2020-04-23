@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="com.solidsense.kura.WirepasSinkConfigurationService"
+        name="Wirepas Sink Configuration"
+        description="Set minimal configuration, to be able to start the sink. The full configuration will be done with WNT.">
+        
+        <Icon resource="OSGI-INF/icon.png" size="16"/>
+        
+        <AD id="sinkName"
+            name="Sink name"
+            type="String"
+            cardinality="0"
+            required="true" 
+            >
+            <Option label="Sink 1"  value="sink1"/>
+            <Option label="Sink 2"   value="sink2"/>
+        </AD>
+            
+        
+        <AD id="sinkAddress"
+            name="Sink address"
+            type="Integer"
+            required="true"
+            cardinality="0"
+            max="16777214"
+            default="1"
+            />
+
+        <AD id="networkAddress"
+            name="Network address"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            max="16777214"
+            />
+
+        <AD id="networkChannel"
+            name="Network channel"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            max="40"
+            />
+    </OCD>
+
+    <Designate pid="com.solidsense.kura.WirepasSinkConfigurationService">
+        <Object ocdref="com.solidsense.kura.WirepasSinkConfigurationService"/>
+    </Designate>
+</MetaData>
