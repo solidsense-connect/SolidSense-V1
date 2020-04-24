@@ -15,7 +15,7 @@ import os
 
 
 
-
+local_log=logging.getLogger(__name__)
 
 
 class SolidSenseParameters():
@@ -30,7 +30,7 @@ class SolidSenseParameters():
     def getParam(name):
         return SolidSenseParameters.active.get(name)
 
-    def __init__(self,service,default,local_log):
+    def __init__(self,service,default):
 
     # local_log=logging.getLogger('Modem_GPS_Service')
 
@@ -49,14 +49,15 @@ class SolidSenseParameters():
                 raise
             json.dump(self._parameters,fp,indent=1)
             fp.close()
-            return
-        try:
-            self._parameters=json.load(fp)
-        except Exception as err:
-            local_log.error("Error decoding parameter file (running on default):"+str(err))
-            self._parameters=default
+        finally:
+            try:
+                self._parameters=json.load(fp)
+            except Exception as err:
+                local_log.error("Error decoding parameter file (running on default):"+str(err))
+                self._parameters=default
         # print(modem_gps_parameters)
-        fp.close()
+            fp.close()
+
         SolidSenseParameters.active=self
 
 
@@ -72,16 +73,18 @@ class SolidSenseParameters():
             return default
 
 
-    def getLogLevel(self):
+    def getLogLevel(self,key='trace'):
         debug_level_def={ 'debug':logging.DEBUG, 'info': logging.INFO , 'warning':logging.WARNING, 'error':logging.ERROR, 'critical':logging.CRITICAL}
         try:
-            level_str= self._parameters['trace']
+            level_str= self._parameters[key]
         except KeyError :
+            local_log.error("Missing trace level for key:"+key+' defaulting to debug')
             return logging.DEBUG
         level_str=level_str.lower()
         try:
             level=debug_level_def[level_str]
         except KeyError :
+            local_log.error("Incorrect trace level for key:"+key+' defaulting to debug')
             return logging.DEBUG
         # print("debug:",level_str,level)
         return level
