@@ -418,8 +418,8 @@ BluetoothDataDir='/data/solidsense/ble_gateway'
 MQTTDataDir='/data/solidsense/mqtt'
 
 class MQTTService (KuraService):
-    Transport_Cmd={"ADDRESS":"mqtt_hostname","PORT":"mqtt_port","USER":"mqtt_username","PASSWORD":"mqtt_password",
-                    }
+    Transport_Cmd={"address":"mqtt_hostname","port":"mqtt_port","user":"mqtt_username","passwd":"mqtt_password",
+                    "secured": None}
     Default_Parameters= {'trace':'info'}
     def __init__(self,kura_config,def_dict):
         KuraService.__init__(self,kura_config,def_dict)
@@ -488,7 +488,7 @@ class MQTTService (KuraService):
         try:
             fd=open(file,'w')
         except IOError as err:
-            servlog.error("Bluetooth transport - "+file+" :"+err)
+            servlog.error("MQTT transport - "+file+" :"+err)
             return
         write_header(fd)
         sec= self.variableValue('SECURE')
@@ -498,23 +498,29 @@ class MQTTService (KuraService):
         fd.write('gateway_id: '+self._gwid+'\n')
         fd.write('mqtt_force_unsecure: '+bool2str(sec)+'\n')
 
-        for c in MQTTService.Transport_Cmd.items():
-            fd.write(c[1])
+        for prop,val in self._properties.items():
+            try:
+                param=MQTTService.Transport_Cmd[prop]
+            except KeyError :
+                param=prop
+            if param == None : continue
+
+            fd.write(param)
             fd.write(": ")
-            fd.write(str(self.variableValue(c[0])))
+            fd.write(str(self.variableValue(prop)))
             fd.write('\n')
 
 
         fd.close()
 
 
-class BluetoothDervice(SolidSenseService):
+class BluetoothService(SolidSenseService):
     Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
     def __init__(self,kura_config,def_dict):
         SolidSenseService.__init__(self,kura_config,def_dict)
 
     def configuration(self):
-        self._service=self.parameterValue('system')
+        # self._service=self.parameterValue('system')
 
         checkCreateDir(BluetoothDataDir)
 

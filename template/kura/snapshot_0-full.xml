@@ -897,22 +897,61 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="com.solidsense.kura.BLEConfigurationService">
+    <esf:configuration pid="com.solidsense.kura.SolidsenseMqttService">
         <esf:properties>
+            <esf:property array="false" encrypted="false" name="transport.passwd" type="String">
+                <esf:value>solidsense</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.autostart" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.user" type="String">
+                <esf:value>solidsense</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.hci2" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.obddongle" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.hci1" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.hci0" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.modemgps" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.obd" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="customID" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>com.solidsense.kura.SolidsenseMqttService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>com.solidsense.kura.SolidsenseMqttService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.address" type="String">
+                <esf:value>192.168.1.12</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="transport.ble" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
             <esf:property array="false" encrypted="false" name="transport.port" type="Integer">
                 <esf:value>1883</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.enabled" type="Boolean">
-                <esf:value>false</esf:value>
+            <esf:property array="false" encrypted="false" name="transport.options" type="String">
+                <esf:value/>
             </esf:property>
             <esf:property array="false" encrypted="false" name="gatewayID" type="String">
                 <esf:value>device</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>com.solidsense.kura.BLEConfigurationService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>com.solidsense.kura.BLEConfigurationService</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="transport.secured" type="Boolean">
                 <esf:value>false</esf:value>

@@ -66,6 +66,10 @@ class GlobalKuraConfig:
             self._snapshot=SnapshotFile(filename)
 
     def rpmb_conf(self):
+        if not os.path.exists("/etc/solidsense_device") :
+            self.simul_rpmb()
+            return
+
         fd = open("/etc/solidsense_device")
         for line in fd:
         #print line
@@ -89,11 +93,14 @@ class GlobalKuraConfig:
         return self._outdoor
 
     def mender_conf(self):
-        fd=open("/etc/mender/artifact_info","r")
-        line=fd.read()
-        eqid=line.index('=')
-        self._firmware= line[eqid+1:len(line)-1]
-        fd.close()
+        if os.path.exists("/etc/mender/artifact_info"):
+            fd=open("/etc/mender/artifact_info","r")
+            line=fd.read()
+            eqid=line.index('=')
+            self._firmware= line[eqid+1:len(line)-1]
+            fd.close()
+        else:
+            self._firmware="Unkwown"
 
     def simul_rpmb(self):
         self._sernum="ZZ191100001"
@@ -549,10 +556,12 @@ def main():
 
     global servlog
     master_file="SolidSense-conf-base.yml"
+    master_file_default=True
     if len(sys.argv) >1 :
         option=sys.argv[1]
         if len(sys.argv) > 2 :
             master_file=sys.argv[2]
+            master_file_default=False
     else:
         option=None
     #template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
@@ -577,7 +586,10 @@ def main():
     kgc=GlobalKuraConfig(template_dir,config_dir)
 
     servlog.info("Reading master configuration file:"+master_file)
-    serv_file=os.path.join(config_dir,master_file)
+    if master_file_default:
+        serv_file=os.path.join(config_dir,master_file)
+    else:
+        serv_file=master_file
     if read_service_def(kgc,serv_file) :
         servlog.critical("Error in default configuration => STOP")
         loghandler.flush()
