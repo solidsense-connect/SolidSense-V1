@@ -216,11 +216,16 @@ services:
     parameters:
         interface: $service_name
         port: internal
+
+- service:
+    type: BLEClientService
+    name: BLE-Client
+    parameters:
+        interface: hci0
         max_connect: 10
         notif_mtu: 63
         trace: info
         debug_bluez: false
-
 
 #
 #   SolidSense MQTT Services

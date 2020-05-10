@@ -515,32 +515,10 @@ class MQTTService (KuraService):
 
 
 class BluetoothService(SolidSenseService):
-    Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
+
     def __init__(self,kura_config,def_dict):
         SolidSenseService.__init__(self,kura_config,def_dict)
 
-    def configuration(self):
-        # self._service=self.parameterValue('system')
-
-        checkCreateDir(BluetoothDataDir)
-
-        # now generate the parameters.json
-        param={}
-        for key,value in  BluetoothService.Default_Parameters.items():
-            if self.asParameter(key):
-                param[key]=self.parameterValue(key)
-            else:
-                param[key]=value
-        outdir=self._kura_config.output_dir(BluetoothDataDir)
-        file=os.path.join(outdir,'parameters.json')
-        try:
-            fd=open(file,'w')
-        except IOError as err:
-            servlog.error("Bluetooth "+str(err))
-            return
-        json.dump(param,fd,indent=1)
-        fd.write('\n')
-        fd.close()
 
     def startService(self):
         # now activate the services for hci1 and hci2
@@ -559,6 +537,34 @@ class BluetoothService(SolidSenseService):
             else:
                 servlog.error("Bluetooth service - unknown port:"+interface)
 
+
+class BLEClientService(SolidSenseService):
+    Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
+    def __init__(self,kura_config,def_dict):
+        SolidSenseService.__init__(self,kura_config,def_dict)
+
+    def configuration(self):
+        # self._service=self.parameterValue('system')
+
+        checkCreateDir(BluetoothDataDir)
+
+        # now generate the parameters.json
+        param={}
+        for key,value in  BLEClientService.Default_Parameters.items():
+            if self.asParameter(key):
+                param[key]=self.parameterValue(key)
+            else:
+                param[key]=value
+        outdir=self._kura_config.output_dir(BluetoothDataDir)
+        file=os.path.join(outdir,'parameters.json')
+        try:
+            fd=open(file,'w')
+        except IOError as err:
+            servlog.error("Bluetooth Client "+str(err))
+            return
+        json.dump(param,fd,indent=1)
+        fd.write('\n')
+        fd.close()
 
 def main():
     pass

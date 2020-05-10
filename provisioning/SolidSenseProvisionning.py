@@ -469,6 +469,7 @@ services_class = {
     "WirepasTransport": WirepasTransport,
     "WirepasMicroService": WirepasMicroService,
     "BluetoothService": BluetoothService,
+    "BLEClientService": BLEClientService,
     "MQTTService":MQTTService
     }
 
