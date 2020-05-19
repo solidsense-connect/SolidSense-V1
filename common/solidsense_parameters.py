@@ -49,7 +49,7 @@ class SolidSenseParameters():
                 raise
             json.dump(self._parameters,fp,indent=1)
             fp.close()
-        finally:
+        else:
             try:
                 self._parameters=json.load(fp)
             except Exception as err:
