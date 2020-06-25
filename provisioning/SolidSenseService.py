@@ -187,6 +187,8 @@ class KuraService(SolidSenseService) :
         for p in self._properties.items():
             name=self.propertyName(p[0])
             value=self.checkAndReplaceVar(p[1])
+            if value == None:
+                value= "**Error***"
             servlog.debug (' Configure property:'+self._name+"."+name+"="+str(value))
             self._snapconf.set_property(name,value)
 

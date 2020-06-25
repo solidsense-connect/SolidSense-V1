@@ -183,8 +183,21 @@ class SnapshotProperty:
             # remove enryption key
             self._prop_xml.set('encrypted','false')
             self._encrypted = False
-        if type(value) == bool :
-            value = bool2str (value)
+
+        # now check if type is matching
+        # correction of issue #590
+        # when there is a type mismatch Kura is crashing
+        if self._type == 'Integer' :
+            if type(value) != int :
+                loclog.error("XML type mismatch (Integer) for:"+self._name)
+                value=0
+        elif self._type == 'Boolean' :
+            if type(value) != bool :
+                loclog.error("XML type mismatch (Boolean) for:"+self._name)
+                value='false'
+            else:
+                value = bool2str (value)
+
         self._value_xml.text=str(value)
 
     def write_simple(self,fd):
