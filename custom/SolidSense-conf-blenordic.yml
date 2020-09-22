@@ -59,32 +59,19 @@ services:
 - service:
     type: BluetoothService
     name: hci1
-    state: interactive
+    state: active
     parameters:
-        configuration: BLEConfigurationService
-        plugin: BLEConfigurationService.dp
-        plugin_name: BLEConfigurationService
-        system: bleTransport
-        gatewayID: device
         interface: $service_name
         port: ttymxc2
+        
+-service:
+    type: BLEClientService
+    name: BLE-Client
+    parameters:
+        interface: hci1
         max_connect: 10
         notif_mtu: 63
         trace: info
         debug_bluez: false
-    variables:
-        ADDRESS: $MQTT_BROKER
-        PORT: $MQTT_PORT
-        USER: $MQTT_USER
-        PASSWORD: $MQTT_PASSWORD
-        FILTERS: ""
-        SCAN: ""
-    properties:
-        transport.enabled: false
-        transport.address: $MQTT_BROKER
-        transport.port: $MQTT_PORT
-        transport.user: $MQTT_USER
-        transport.passwd: $MQTT_PASSWORD
-        transport.filters: ""
-        transport.scan: ""
+    
 

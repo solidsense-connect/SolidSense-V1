@@ -17,7 +17,11 @@ import logging
 import stat
 
 from SolidSenseService import *
-from QuectelAT_Service import *
+try:
+    from QuectelAT_Service import *
+except ImportError :
+    pass
+
 from provisioning_utils import *
 
 loclog=logging.getLogger('SolidSense-provisioning')
@@ -169,6 +173,10 @@ class ModemGps(SolidSenseService):
                 modem = QuectelModem(tty1)
             except ModemException as err:
                 loclog.error('Modem Service => Error during modem access:'+str(err))
+                self._valid=False
+                return
+            except ImportError :
+                loclog.error('Modem Service => Missing Quectel AT module')
                 self._valid=False
                 return
             #

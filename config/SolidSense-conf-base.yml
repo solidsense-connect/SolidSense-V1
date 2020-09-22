@@ -212,34 +212,56 @@ services:
 - service:
     type: BluetoothService
     name: hci0
-    state: interactive
+    state: active
     parameters:
-        configuration: BLEConfigurationService
-        plugin: BLEConfigurationService.dp
-        plugin_name: BLEConfigurationService
-        system: bleTransport
-        gatewayID: device
         interface: $service_name
         port: internal
+
+- service:
+    type: BLEClientService
+    name: BLE-Client
+    parameters:
+        interface: hci0
         max_connect: 10
         notif_mtu: 63
         trace: info
         debug_bluez: false
+
+#
+#   SolidSense MQTT Services
+#
+- service:
+    type: MQTTService
+    name: mqtt1
+    state: interactive
+    parameters:
+        configuration: SolidsenseMqttService
+        plugin: SolidsenseMqttService.dp
+        plugin_name: SolidsenseMqttService
+        system: solidsense_mqtt
+        prefix: transport
     variables:
-        ADDRESS: 127.0.0.1
+        ENABLE: True
+        SECURE: False
+        ADDRESS: 192.168.1.12
         PORT: 1883
-        USER: ""
-        PASSWORD: ""
-        FILTERS: ""
-        SCAN: ""
+        USER: solidsense
+        PASSWORD: solidsense
     properties:
-        transport.enabled: false
-        transport.address: $ADDRESS
-        transport.port: $PORT
-        transport.user: $USER
-        transport.passwd: $PASSWORD
-        transport.filters: ""
-        transport.scan: ""
+        enabled: $ENABLE
+        secured: $SECURE
+        address: $ADDRESS
+        user: $USER
+        port: $PORT
+        passwd: $PASSWORD
+        persist: true
+        maxpacket: 1000
+        maxdelay: 1800
+        ble: hci0
+        modemgps: true
+        autostart: false
+        obd: true
+        obddongle: OBD
 #
 #  Wirepas with sink1 and sink2 interactive
 #        

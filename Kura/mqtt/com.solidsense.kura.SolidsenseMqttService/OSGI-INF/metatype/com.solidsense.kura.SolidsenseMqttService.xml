@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="com.solidsense.kura.SolidsenseMqttService"
+        name="Solidsense MQTT Configuration"
+        description="">
+        
+        <Icon resource="OSGI-INF/icon.png" size="16"/>
+        
+        
+        <AD id="gatewayID"
+            name="Gateway ID"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="device" 
+            >
+            <Option label="Device Name"  value="device"/>
+            <Option label="Custom" value="custom"/>
+            <Option label="Automatic" value="auto"/>
+            
+        </AD>
+        <AD id="customID"
+            name="Gateway custom ID / Prefix"
+            type="String"
+            cardinality="0"
+            required="false" 
+            description="This custom ID can be used as a prefix if you use the device name"
+            >
+        </AD>
+
+        
+        <AD id="transport.enabled"  
+            name="MQTT enabled"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable/Disable the Solidsense MQTT service"/>
+
+        <AD id="transport.secured"  
+            name="MQTT transport secure"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable TLS for the MQTT service"/>
+
+        <AD id="transport.address"
+            name="MQTT Broker address"
+            type="String"
+            required="false"
+            cardinality="0"
+            description=""/>
+
+        <AD id="transport.port"
+            name="MQTT Broker port"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="1883"
+            max="65536"
+            description=""/>
+
+        <AD id="transport.user"
+            name="MQTT Broker username"
+            type="String"
+            cardinality="0"
+            required="false"
+            description=""/>
+            
+       <AD id="transport.passwd"
+            name="MQTT Broker password"
+            type="String"
+            cardinality="0"
+            required="false"
+            description=""/>
+
+
+        <AD id="transport.ble"  
+            name="BLE active"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable/Disable the BLE service"/>
+            
+       <AD id="transport.hci0"  
+            name=" enable hci0"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description=""/>
+            
+       <AD id="transport.hci1"  
+            name=" enable hci1"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description=""/>
+            
+       <AD id="transport.hci2"  
+            name=" enable hci2"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description=""/>
+
+        <AD id="transport.modemgps"  
+            name="Modem / GPS active"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable/Disable the Modem / GPS service integration"/>
+
+        <AD id="transport.obd"  
+            name="Vehicle OBD active"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable/Disable the OBD service integration"/>
+            
+         <AD id="transport.obddongle"
+            name="Vehicle OBD dongle name (first letters) or MAC address"
+            type="String"
+            required="false"
+            cardinality="0"
+            description=""/>
+
+        <AD id="transport.autostart"  
+            name="Auto start"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Execute the commands in the autostart script (/data/solidsense/mqtt/autostart)"/>
+
+
+       <AD id="transport.options"
+            name="Additional parameters (Expert mode)"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="The list of additional parameters to add to the configuration file (one per line).|TextArea"/>
+
+            
+            
+    </OCD>
+
+    <Designate pid="com.solidsense.kura.SolidsenseMqttService">
+        <Object ocdref="com.solidsense.kura.SolidsenseMqttService"/>
+    </Designate>
+</MetaData>
