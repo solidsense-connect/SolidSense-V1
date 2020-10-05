@@ -190,6 +190,93 @@ openocd_set_mac () {
 	openocd_uicr_load
 }
 
+determine_hardware () {
+	type="$(tr -d '\000' < /proc/device-tree/model)"
+	case "${type}" in
+		"SolidRun HummingBoard2 Solo/DualLite (1.5som+emmc)" )
+			hardware="n6gsdl"
+			;;
+		"SolidRun HummingBoard2 Dual/Quad (1.5som+emmc)" )
+			hardware="n6gq"
+			;;
+		"SolidRun SolidSense IN6 Solo/DualLite (1.5som+emmc)" )
+			hardware="in6gsdl"
+			;;
+		"SolidRun SolidSense IN6 Dual/Quad (1.5som+emmc)" )
+			hardware="in6gq"
+			;;
+		* )
+			hardware="UNKNOWN"
+			;;
+	esac
+
+	echo "${hardware}"
+}
+
+determine_swds () {
+	hardware=$(determine_hardware)
+	case "${hardware}" in
+		n6gsdl|n6gq )
+			case "${1}" in
+				1|sink1 )
+					SWD="82 81"
+					;;
+				2|sink2 )
+					SWD="59 125"
+					;;
+				* )
+					SWD="UNKNOWN"
+					;;
+			esac
+			;;
+		in6gsdl|in6gq )
+			case "${1}" in
+				1|sink1 )
+					SWD="64 65"
+					;;
+				2|sink2 )
+					SWD="UNKNOWN"
+					;;
+				* )
+					SWD="UNKNOWN"
+					;;
+			esac
+			;;
+		UNKNOWN )
+			echo "Hardware type <${hardware}> not found!"
+			exit 1
+			;;
+		* )
+			echo "Hardware type <${hardware}> not found!"
+			exit 1
+			;;
+	esac
+
+	echo "${SWD}"
+}
+
+determine_offset () {
+	hardware=$(determine_hardware)
+
+	case "${hardware}" in
+		n6gsdl|n6gq )
+			FLASH_OFFSET="0x8000"
+			;;
+		in6gsdl|in6gq )
+			FLASH_OFFSET="0xc000"
+			;;
+		UNKNOWN )
+			echo "Hardware type <${hardware}> not found!"
+			FLASH_OFFSET="UNKNOWN"
+			;;
+		* )
+			echo "Hardware type <${hardware}> not found!"
+			FLASH_OFFSET="UNKNOWN"
+			;;
+	esac
+	echo "${FLASH_OFFSET}"
+}
+
 cleanup () {
 	if [ -f "${OCD_CFG_FILE}" ]; then
 		rm -f "${OCD_CFG_FILE}"
@@ -236,11 +323,9 @@ do
 			;;
 		-s|--sink )
 			shift
-			if [ "${1}" = "1" ]; then
-				OCD_SWD_NUMS="82 81"
-			elif [ "${1}" = "2" ]; then
-				OCD_SWD_NUMS="59 125"
-			else
+			OCD_SWD_NUMS=$(determine_swds "${1}")
+			if [ "${OCD_SWD_NUMS}" = "UNKNOWN" ]; then
+				echo "Unknown sink device <${1}>!"
 				usage
 			fi
 			;;
@@ -251,7 +336,7 @@ do
 			if [ "${1}" = "boot" ]; then
 				FLASH_OFFSET="0x0"
 			elif [ "${1}" = "program" ]; then
-				FLASH_OFFSET="0x8000"
+				FLASH_OFFSET=$(determine_offset)
 			elif [ "${1}" = "wirepas" ]; then
 				FLASH_OFFSET=""
 			else
