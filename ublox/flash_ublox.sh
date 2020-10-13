@@ -13,6 +13,7 @@ FILENAME=""
 MAC=""
 STATUS_CHECK_MAC="0"
 STATUS_TYPE="0"
+DEVICE="b1"
 
 # Functions
 openocd_create_cfg_file () {
@@ -256,21 +257,21 @@ determine_swds () {
 }
 
 determine_offset () {
-	hardware=$(determine_hardware)
+	device="${1}"
 
-	case "${hardware}" in
-		n6gsdl|n6gq )
+	case "${device}" in
+		b1|B1 )
 			FLASH_OFFSET="0x8000"
 			;;
-		in6gsdl|in6gq )
+		b3|B3 )
 			FLASH_OFFSET="0xc000"
 			;;
 		UNKNOWN )
-			echo "Hardware type <${hardware}> not found!"
+			echo "Device type <${hardware}> not found!"
 			FLASH_OFFSET="UNKNOWN"
 			;;
 		* )
-			echo "Hardware type <${hardware}> not found!"
+			echo "Device type <${hardware}> not found!"
 			FLASH_OFFSET="UNKNOWN"
 			;;
 	esac
@@ -294,18 +295,19 @@ cleanup () {
 }
 
 usage () {
-	echo "$(basename "${0}"):"
-	echo "    -s|--sink <sink: 1|2>                      : mandatory option"
+	echo "$(basename "${0}"): firmware                   : Firmware image to flash"
+	echo "    -s|--sink                                  : Sink <1|2>"
+	echo "    -d|--device                                : Nina <b1|B1> or Nina <b3|B3>"
 	echo "    -m|--mac-check                             :"
 	echo "    -M|--mac-set <MAC Address>                 : example: 0a:01:02:03:04:05"
-	echo "    -t|--type <type: boot|program|wirepas>     :"
+	echo "    -t|--type                                  : type to flash <boot|program|wirepas>"
 	echo "    <FILE>                                     : file to flash"
 	echo ""
-	echo "	example: $(basename "${0}") -s1 -tboot blehci-boot-1.2.0.bin"
+	echo "	example: $(basename "${0}") -s1 -db1 -tboot blehci-boot-1.2.0.bin"
 	exit 1
 }
 
-options=$(getopt -l "help,mac-check,mac-set:,sink:,type:" -o ":hmM:s:t:" -- "${@}")
+options=$(getopt -l "help,mac-check,mac-set:,sink:,device:,type:" -o ":hmM:s:d:t:" -- "${@}")
 eval set -- "${options}"
 
 while true
@@ -329,19 +331,14 @@ do
 				usage
 			fi
 			;;
+		-d|--device )
+			shift
+			DEVICE="${1}"
+			;;
 		-t|--type )
 			shift
 			STATUS_TYPE="1"
 			TYPE="${1}"
-			if [ "${1}" = "boot" ]; then
-				FLASH_OFFSET="0x0"
-			elif [ "${1}" = "program" ]; then
-				FLASH_OFFSET=$(determine_offset)
-			elif [ "${1}" = "wirepas" ]; then
-				FLASH_OFFSET=""
-			else
-				usage
-			fi
 			;;
 		\? )
 			usage
@@ -396,6 +393,24 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 	else
 		FILENAME="${1}"
 		if [ -f "${FILENAME}" ]; then
+			case "${TYPE}" in
+				boot )
+					FLASH_OFFSET="0x0"
+					;;
+				program )
+					FLASH_OFFSET="$(determine_offset "${DEVICE}")"
+					;;
+				wirepas )
+					FLASH_OFFSET=""
+					;;
+				* )
+					echo "Unknown type <${TYPE}> not found!"
+					openocd_reset_run
+					openocd_shutdown
+					cleanup
+					exit 1
+					;;
+			esac
 			openocd_load
 		else
 			echo "The <${FILENAME}> does not exist!"
