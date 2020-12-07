@@ -153,8 +153,8 @@ class ModemGps(SolidSenseService):
             self._valid=True
             kura_config.set_variable('MODEM_KURAID',"EC25_2-1.2")
         else:
-            mdm_usb=findUsbModem('Quectel')
-            if mdm_usb == None :
+
+            if QuectelModem.checkModemPresence() :
                 self._valid=False
                 return
 
