@@ -236,7 +236,7 @@ determine_swds () {
 					SWD="64 65"
 					;;
 				2|sink2 )
-					SWD="UNKNOWN"
+					SWD="91 90"
 					;;
 				* )
 					SWD="UNKNOWN"
