@@ -11,6 +11,11 @@ if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
 	python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py | logger --tag "provisioning" 2>&1
 fi
 
+# Run the creation of the httpskeystore.ks
+if [ ! -f /opt/eclipse/kura/user/security/httpskeystore.ks ] ; then
+	keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit
+fi
+
 # Update kura_custom.properties
 KURA_CUSTOM_PROPERTIES_FILE="/opt/eclipse/kura/user/kura_custom.properties"
 KURA_CUSTOM_PROPERTIES_FILE_TMP="/tmp/kura_custom.properties"
