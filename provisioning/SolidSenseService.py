@@ -94,6 +94,9 @@ class SolidSenseService:
             if value == None :
                 return None
         return self.checkAndReplaceVar(value)
+    
+    def addProperty(self,name,value):
+        self._properties[name]=value
 
     def asVariable(self,name):
         if name in self._variables.keys():

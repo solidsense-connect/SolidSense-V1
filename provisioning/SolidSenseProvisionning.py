@@ -26,7 +26,8 @@ from SnapshotXML import *
 #servlog=logging.getLogger('SolidSense-provisioning')
 servlog=None
 
-
+class ProvisioningException(Exception):
+    pass
 
 class GlobalKuraConfig:
     '''
@@ -61,9 +62,14 @@ class GlobalKuraConfig:
 
         snapshot_name= self.get_variable("snapshot_0","snapshot_0.xml")
         filename=self.template('kura',snapshot_name)
+        if filename is None:
+            filename=self.template('kura', "snapshot_0.xml")
         servlog.info("Reading model snapshot_0:"+filename)
-        if filename != None:
+        if filename is not None:
             self._snapshot=SnapshotFile(filename)
+        else :
+            servlog.critical("Missing model snapshot_0 provisioning halted")
+            raise ProvisioningException()
 
     def rpmb_conf(self):
         if not os.path.exists("/etc/solidsense_device") :

@@ -80,6 +80,12 @@ def checkAndRemoveFile(dir,file):
         if os.path.lexists(path):
             os.remove(path)
 
+def fileExists(dir,file):
+    if os.path.lexists(dir):
+       path=os.path.join(dir,file)
+       if os.path.lexists(path):
+           return True
+    return False 
 
 def write_header(fd):
     t=datetime.datetime.now()
