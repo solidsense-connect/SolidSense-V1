@@ -11,7 +11,7 @@
 import os, sys, inspect
 pathhead=os.path.split(inspect.getfile( inspect.currentframe() ))[0]
 print (pathhead)
-if pathhead == '/opt/SolidSense/provisoning' :
+if pathhead == '/opt/SolidSense/provisioning' :
     sys.path.insert(0, '/opt/SolidSense/modem_gps')
 else:
     cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "../../modem_gps")))
