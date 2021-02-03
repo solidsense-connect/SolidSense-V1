@@ -101,7 +101,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
 		-XX:ErrorFile=/var/log/kura-error.log \
 		-XX:+IgnoreUnrecognizedVMOptions \
-		--add-modules=java.sql,java.xml,java.xml.bind \
+		--add-modules=ALL-SYSTEM \
 		-Dkura.os.version=raspbian \
 		-Dkura.arch=armv7_hf \
 		-Dtarget.device=raspberry-pi-2 \
@@ -109,7 +109,6 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-Dkura.home="${DIR}" \
 		-Dkura.configuration=file:"${DIR}"/framework/kura.properties \
 		-Dkura.custom.configuration=file:"${DIR}"/user/kura_custom.properties \
-		-Dkura.data.dir="${DIR}"/data \
 		-Ddpa.configuration="${DIR}"/data/dpa.properties \
 		-Dlog4j.configurationFile=file:"${DIR}"/user/log4j.xml \
 		-Djava.security.policy="${DIR}"/framework/jdk.dio.policy \
@@ -117,7 +116,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-Djdk.tls.trustNameService=true \
 		-Dosgi.console=5002 \
 		-Declipse.consoleLog=true \
-		-jar "${DIR}"/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar \
+		-jar "${DIR}"/plugins/org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar \
 		-configuration /tmp/.kura/configuration) &
 
 	#Save the PID
