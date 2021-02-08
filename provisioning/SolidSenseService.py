@@ -25,6 +25,7 @@ state_INTERACTIVE='interactive'
 
 services_States={state_DISABLED: False, state_INTERACTIVE: False, state_AUTO: True, state_ACTIVE: True}
 
+
 class SolidSenseService:
 
     def __init__(self,kura_config,def_dict):
@@ -91,7 +92,7 @@ class SolidSenseService:
             value=self._variables[name]
         except KeyError :
             value=self._kura_config.get_variable(name)
-            if value == None :
+            if value is None :
                 return None
         return self.checkAndReplaceVar(value)
     
@@ -131,7 +132,6 @@ class SolidSenseService:
             vt=value[var_s+1:i]
             end=value[i:]
 
-
             var_v= self.variableValue(vt)
             # print("Variable=",vt,"end=",end,"val=",var_v)
 
@@ -152,19 +152,16 @@ class SolidSenseService:
         else:
             return value
 
-
     def parameterValue(self,name):
         try:
             value=self._parameters[name]
         except KeyError:
-             servlog.info("Service:"+self._name+" missing parameter:"+name)
-             return None
+            servlog.info("Service:"+self._name+" missing parameter:"+name)
+            return None
         return self.checkAndReplaceVar(value)
 
 
-
-
-class KuraService(SolidSenseService) :
+class KuraService(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
         SolidSenseService.__init__(self,kura_config,def_dict)
@@ -179,22 +176,24 @@ class KuraService(SolidSenseService) :
 
     def propertyName(self,property_short):
 
-        if self._prefix == None :
+        if self._prefix is None :
             return property_short
         else:
             return self._prefix+'.'+property_short
 
     def configuration(self):
-        self._snapconf=self._kura_config.getSnapshot_conf(self._snapshot_confname)
+        self._snapconf = self._kura_config.getSnapshot_conf(self._snapshot_confname)
         # print ("Adjusting XML for:",self.name())
+        if self._snapconf is None:
+            servlog.error("No configuration in snapshot for%s"%self.name())
+            return
         for p in self._properties.items():
             name=self.propertyName(p[0])
             value=self.checkAndReplaceVar(p[1])
-            if value == None:
+            if value is None:
                 value= "**Error***"
             servlog.debug (' Configure property:'+self._name+"."+name+"="+str(value))
             self._snapconf.set_property(name,value)
-
 
 
 class NetworkService(KuraService):
@@ -209,6 +208,7 @@ class NetworkService(KuraService):
         for name,value in self._properties.items():
             line="%s=%s\n" % (self.propertyName(name),str(self.checkAndReplaceVar(value)))
             fd.write(line)
+
 
 class WiFiService(NetworkService):
 

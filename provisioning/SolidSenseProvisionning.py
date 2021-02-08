@@ -169,7 +169,7 @@ class GlobalKuraConfig:
         self._id=rank
         # now add the week
         self._id += week << 11
-        if year >= 19 and year <= 22 :
+        if 19 <= year <= 22:
             year_code= year - 19
         elif year == 18 :
             year_code=0 # map into 2019 but that is no issue
@@ -179,8 +179,6 @@ class GlobalKuraConfig:
 
         self._id += year_code << 17
         # print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
-
-
 
     def getSnapshot_conf(self,name):
         return self._snapshot.get_configuration(name)
@@ -453,8 +451,6 @@ class GlobalKuraConfig:
             fo.write(line[ke+2:])
             # fo.write('\n')
             # next line
-
-
         ft.close()
         fo.close()
 
@@ -468,7 +464,7 @@ services_class = {
     "KuraService":KuraService,
     "NetworkService": NetworkService,
     "WiFiService": WiFiService,
-    #"EthernetService": EthernetService,
+    # "EthernetService": EthernetService,
     "ModemGps": ModemGps,
     "PppService": PppService,
     "WirepasSink": WirepasSink,
@@ -478,6 +474,7 @@ services_class = {
     "BLEClientService": BLEClientService,
     "MQTTService":MQTTService
     }
+
 
 def read_service_def(kgc_o,serv_file):
     '''
@@ -492,19 +489,19 @@ def read_service_def(kgc_o,serv_file):
     try:
         res=yaml.load(fd,Loader=yaml.FullLoader)
     except yaml.YAMLError as err:
-         servlog.error("service file:"+serv_file+" syntax error"+str(err))
-         return True
+        servlog.error("service file:"+serv_file+" syntax error"+str(err))
+        return True
 
     #  first the global variables
     global_def= res.get('gateway')
-    if global_def == None :
+    if global_def is None :
         servlog.info('No global variables definition')
     else:
         for name,value in global_def.items() :
             kgc_o.set_variable(name,value)
-        #kgc_o.dump_variables()
+        # kgc_o.dump_variables()
     services_def=res.get('services')
-    if services_def == None :
+    if services_def is None :
         servlog.info('No services definition')
         return True
 
@@ -514,12 +511,12 @@ def read_service_def(kgc_o,serv_file):
         # print ("Instanciating:", service_def.get('type'))
         try:
             service_class_name=service_def['type']
-        except KeyError :
+        except KeyError:
             servlog.error("missing service type")
             continue
         try:
             service_name=service_def['name']
-        except KeyError :
+        except KeyError:
             servlog.error("missing service name")
             continue
         try:
@@ -535,7 +532,7 @@ def read_service_def(kgc_o,serv_file):
 
         if not override :
             service = kgc_o.get_service(service_name)
-            if service == None :
+            if service is None :
                 override = True
             else:
                 servlog.info("combining Service:"+service_name)
@@ -547,6 +544,7 @@ def read_service_def(kgc_o,serv_file):
             kgc_o.add_service(service_name,service)
 
     return False
+
 
 def main():
     # template_dir='C:\\Users\\laure\\Sterwen-Tech\\Git-SolidRun\\SolidSense-V1\\template'
@@ -564,29 +562,28 @@ def main():
     global servlog
     master_file="SolidSense-conf-base.yml"
     master_file_default=True
-    if len(sys.argv) >1 :
+    if len(sys.argv) > 1:
         option=sys.argv[1]
         if len(sys.argv) > 2 :
             master_file=sys.argv[2]
             master_file_default=False
     else:
         option=None
-    #template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
+    # template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
     # config_dir= '/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/config'
     # looging system
     logfile=os.path.join(custom_dir,'provisioning.log')
     # root_logger = logging.basicConfig(filename=logfile,level=logging.INFO)
-    servlog=logging.getLogger('SolidSense-provisioning')
-    if option == None and not isWindows():
-        loghandler=logging.FileHandler(logfile,mode='w')
+    servlog = logging.getLogger('SolidSense-provisioning')
+    if option is None and not isWindows():
+        loghandler = logging.FileHandler(logfile,mode='w')
     else:
-        loghandler=logging.StreamHandler()
+        loghandler = logging.StreamHandler()
 
-    logformat= logging.Formatter("%(asctime)s | [%(levelname)s] %(message)s")
+    logformat = logging.Formatter("%(asctime)s | [%(levelname)s] %(message)s")
     loghandler.setFormatter(logformat)
     servlog.addHandler(loghandler)
     servlog.setLevel(logging.DEBUG)
-
 
     servlog.info('*******Starting gateway provisioning process***********')
     loghandler.flush()
@@ -600,7 +597,7 @@ def main():
     if read_service_def(kgc,serv_file) :
         servlog.critical("Error in default configuration => STOP")
         loghandler.flush()
-        return
+        raise ProvisioningException
     # now check if we a custom configuration file
     custom_file = 'SolidSense-conf-custom.yml'
     '''
@@ -608,7 +605,7 @@ def main():
     First search in   /data/solidsense/config
     Then in /opt/SolidSense/config
     '''
-    cust_file=os.path.join(custom_dir,custom_file)
+    cust_file = os.path.join(custom_dir,custom_file)
     # check existence
     if not os.path.lexists(cust_file) :
         # there is no file is the /data partition
@@ -618,7 +615,7 @@ def main():
             servlog.debug("Custom configuration not existing:"+cust_file)
             cust_file=None
 
-    if cust_file != None :
+    if cust_file is not None :
         servlog.info("Reading custom configuration file:"+cust_file)
         if read_service_def(kgc,cust_file) :
             servlog.info("Error in custom configuration file")
@@ -628,7 +625,7 @@ def main():
     kgc.gen_secondary_global()
     # trace the variables
     kgc.dump_variables()
-    if option != None :
+    if option is not None :
         if option == "--syntax" :
             servlog.info("******** Syntax check mode ** No configuration generated")
             loghandler.flush()
@@ -647,5 +644,10 @@ def main():
         kgc.start_services()
     loghandler.flush()
 
+
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        exit(0)
+    exit(1)

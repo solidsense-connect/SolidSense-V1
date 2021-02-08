@@ -8,7 +8,14 @@ KURA_CUSTOM_PROPERTIES_FILE="/opt/eclipse/kura/user/kura_custom.properties"
 # Run the SolidSense provisionning script.
 if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
 	cd "/opt/SolidSense/provisioning" || exit
+	rm -f /var/log/kura.log
 	python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py | logger --tag "provisioning" 2>&1
+	res="$?"
+	echo "Result of provisioning:${res}"
+	if [ "${res}" -eq 0 ] ; then
+		echo "Error in the provisioning process => defaulting snapshot_0"
+		cp /opt/SolidSense/template/kura/snapshot_0.xml /opt/eclipse/kura/user/snapshots/
+	fi
 fi
 
 # Run the creation of the httpskeystore.ks
