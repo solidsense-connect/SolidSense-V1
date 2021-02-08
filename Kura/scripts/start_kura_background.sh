@@ -10,7 +10,7 @@ if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
 	cd "/opt/SolidSense/provisioning" || exit
 	rm -f /var/log/kura.log
 	python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py | logger --tag "provisioning" 2>&1
-	res="$?"
+	res="${PIPESTATUS[0]}"
 	echo "Result of provisioning:${res}"
 	if [ "${res}" -eq 0 ] ; then
 		echo "Error in the provisioning process => defaulting snapshot_0"
