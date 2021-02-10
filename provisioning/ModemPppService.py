@@ -39,10 +39,9 @@ class PppService(NetworkService):
     def __init__(self,kura_config,def_dict):
         super().__init__(kura_config,def_dict)
 
-
     def configuration(self):
         modem=self._kura_config.get_service('modem_gps')
-        if modem == None:
+        if modem is None:
             self._state=state_DISABLED
             loclog.error("Ppp Service => No supporting modem service")
             self._valid = False
@@ -52,7 +51,6 @@ class PppService(NetworkService):
                 loclog.error('Ppp Service => No valid modem')
                 self._state=state_DISABLED
 
-        
         if self._state == state_DISABLED :
             self.addProperty('config.ip4.status','netIPv4StatusDisabled')
         
@@ -128,12 +126,11 @@ class PppService(NetworkService):
             except IOError as err:
                 servlog.error(str(err))
                 return
-            line="%s\t*\t%s\t*\t#%s\n"%(user,passwd,model)
+            line="%s\t*\t%s\t*\t#%s\n"%(user, passwd, model)
             fd.write(line)
             fd.close()
 
-
-        if self.asVariable('APN_AUTH') :
+        if self.asVariable('APN_AUTH'):
             auth=self.variableValue('APN_AUTH')
             gen_pap=False
             gen_chap=False
