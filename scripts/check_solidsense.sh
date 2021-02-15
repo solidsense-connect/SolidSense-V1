@@ -5,8 +5,6 @@ mmc_output="$(/usr/bin/mmc rpmb read-block ${rpmb_device} 0x0 1 - | sed 's/,/ /g
 solidsense_file="/etc/solidsense"
 hosts_file="/etc/hosts"
 tmp_hosts_file="/tmp/hosts"
-hostapd_conf_file="/etc/hostapd-wlan0.conf"
-tmp_hostapd_conf_file="/tmp/hostapd-wlan0.conf"
 hostname_file="/etc/hostname"
 kernel_hostname_file="/proc/sys/kernel/hostname"
 redo_check_etc_solidsense=0
@@ -60,20 +58,6 @@ check_etc_hosts () {
 	fi
 }
 
-check_etc_hostapd_conf () {
-	${log_it} "Checking ${hostapd_conf_file}"
-	if [ -f ${hostapd_conf_file} ]
-	then
-		${log_it} "${hostapd_conf_file} exists"
-		if ! /bin/grep -q "ssid=${SERIAL}" ${hostapd_conf_file}
-		then
-			${log_it} "Updating ${hostapd_conf_file}"
-			/bin/sed "s/^ssid=.*/ssid=${SERIAL}/" < ${hostapd_conf_file} > ${tmp_hostapd_conf_file}
-			/bin/mv ${tmp_hostapd_conf_file} ${hostapd_conf_file}
-		fi
-	fi
-}
-
 check_etc_hostname () {
 	${log_it} "Checking ${hostname_file}"
 	if [ -f ${hostname_file} ]
@@ -114,9 +98,6 @@ fi
 
 # shellcheck source=/dev/null
 . ${solidsense_file}
-
-# Check ${hostapd_conf_file}
-check_etc_hostapd_conf
 
 # Check ${hosts_file}
 check_etc_hosts
