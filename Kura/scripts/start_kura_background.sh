@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Kura should be installed to the /opt/eclipse directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
@@ -20,7 +20,10 @@ fi
 
 # Run the creation of the httpskeystore.ks
 if [ ! -f /opt/eclipse/kura/user/security/httpskeystore.ks ] ; then
-	keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit
+	$(keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks \
+		-deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" \
+		-ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign \
+		-ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit)
 fi
 
 # Update kura_custom.properties
@@ -116,7 +119,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-Dkura.home="${DIR}" \
 		-Dkura.configuration=file:"${DIR}"/framework/kura.properties \
 		-Dkura.custom.configuration=file:"${DIR}"/user/kura_custom.properties \
-		-Ddpa.configuration="${DIR}"/data/dpa.properties \
+		-Ddpa.configuration="${DIR}"/packages/dpa.properties \
 		-Dlog4j.configurationFile=file:"${DIR}"/user/log4j.xml \
 		-Djava.security.policy="${DIR}"/framework/jdk.dio.policy \
 		-Djdk.dio.registry="${DIR}"/framework/jdk.dio.properties \
