@@ -193,8 +193,11 @@ class ModemGps(SolidSenseService):
             #
             #  now get the parameters
             #
-
-            modem_kura_id=modem.model()+"_"+mdm_usb['dev_path']
+            # special case for Quectel EC25 => EX25 in Kura
+            mdm_model = modem.model()
+            if mdm_model == "EC25":
+                mdm_model = "EX25"
+            modem_kura_id = mdm_model +"_"+mdm_usb['dev_path']
 
             kura_config.set_variable('MODEM_MFG',modem.manufacturer())
             kura_config.set_variable('MODEM_MODEL',modem.model())

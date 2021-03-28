@@ -61,7 +61,7 @@ class SnapshotFile:
             print(err)
 
     def write_simple(self, filename=None):
-        if filename == None:
+        if filename is None:
             fd = sys.stdout
         else:
             try:
@@ -72,6 +72,11 @@ class SnapshotFile:
         for c in self._configurations.values():
             c.write_simple(fd)
         fd.close()
+
+    def merge_configurations(self, additionalXML):
+        for c in additionalXML._configurations.values():
+            self._configurations[c.name()]=c
+
 
 
 class SnapshotConfiguration:
@@ -218,13 +223,16 @@ def main():
     if len(sys.argv) < 2:
         print("Need an xml input file")
         return
-    print("analyszing file:", sys.argv[1])
-    snf = SnapshotFile(sys.argv[1])
+    print("analyzing file:", sys.argv[1])
+    snf0 = SnapshotFile(sys.argv[1])
     if len(sys.argv) > 2:
         filename = sys.argv[2]
-    else:
-        filename = None
-    snf.write_simple(filename)
+        print("analysing additional file:",filename)
+        snfadd=SnapshotFile(filename)
+        print("merging...")
+        snf0.merge_configurations(snfadd)
+
+    snf0.write_simple()
 
 
 if __name__ == '__main__':

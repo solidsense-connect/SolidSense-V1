@@ -1,7 +1,7 @@
 #
-#  Base file for SolidSense provisioning V0.95
+#  Base file for SolidSense provisioning V1.2
 #
-#  Copyright Sterwen-Technology/SolidRun 2019
+#  Copyright Sterwen-Technology/SolidRun 2019, 2021
 #
 #   that file provide the basic minimum configuration for Kura and all SolidSense services
 #   It shall be located in /opt/SolidSense/config and named SolidSense-conf-base.yml
@@ -240,7 +240,7 @@ services:
     state: interactive
     parameters:
         configuration: SolidsenseMqttService
-        plugin: SolidsenseMqttService_1.0.0.dp  # To be further investigated why we shall have that only for the MQTT agent
+        plugin: SolidsenseMqttService.dp  # To be further investigated why we shall have that only for the MQTT agent
         plugin_name: SolidsenseMqttService
         system: solidsense_mqtt
         prefix: transport

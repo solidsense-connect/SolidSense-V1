@@ -57,7 +57,6 @@ class GlobalKuraConfig:
         self.read_model_file()
         self.set_internal_variables()
 
-
     def read_source_snapshot(self):
 
         snapshot_name= self.get_variable("snapshot_0","snapshot_0.xml")
@@ -70,9 +69,19 @@ class GlobalKuraConfig:
         else :
             servlog.critical("Missing model snapshot_0 provisioning halted")
             raise ProvisioningException()
+        #
+        #  now read the additional snapshot with SolidSense services
+        #
+        snap_ss_name = self.get_variable("snapshot_solidsense", "snapshot_0-solidsense.xml")
+        filename = self.template('kura', snap_ss_name)
+        if filename is None:
+            filename=self.template('kura', "snapshot_0-solidsense.xml")
+        servlog.info("Reading model snapshot_0 solidsense:"+filename)
+        snap_ss = SnapshotFile(filename)
+        self._snapshot.merge_configurations(snap_ss)
 
     def rpmb_conf(self):
-        if not os.path.exists("/etc/solidsense_device") :
+        if not os.path.exists("/etc/solidsense_device"):
             self.simul_rpmb()
             return
 
@@ -341,8 +350,9 @@ class GlobalKuraConfig:
         '''
         Generate the plugin reference file for Kura: dpa.properties
         '''
-        outdir=self.output_dir('/opt/eclipse/kura/data/')
-        output=os.path.join(outdir,'dpa.properties' )
+        # changes for Kura5 packages direct under kura
+        outdir=self.output_dir('/opt/eclipse/kura/data')
+        output=os.path.join(outdir, 'dpa.properties')
         plugin_dir='/opt/eclipse/kura/data/packages'
         try:
             fd=open(output,'w')
@@ -395,7 +405,6 @@ class GlobalKuraConfig:
         tf=self.template(category,infile)
         if tf != None :
             self.genconfigfile(service,tf,output_file)
-
 
     def genconfigfile(self,service,template,output_file):
         '''

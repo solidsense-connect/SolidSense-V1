@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -613,17 +613,11 @@
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">
         <esf:properties>
-            <esf:property array="false" encrypted="false" name="https.port" type="Integer">
+            <esf:property array="true" encrypted="false" name="https.ports" type="Integer">
                 <esf:value>443</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="https.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.port" type="Integer">
-                <esf:value>80</esf:value>
+            <esf:property array="true" encrypted="false" name="https.client.auth.ports" type="Integer">
+                <esf:value>4443</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="https.keystore.path" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>
@@ -639,22 +633,6 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-	<esf:configuration pid="org.eclipse.kura.cloud.app.command.CommandCloudApp">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="command.timeout" type="Integer">
-                <esf:value>60</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="command.enable" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.cloud.app.command.CommandCloudApp</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.cloud.app.command.CommandCloudApp</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="users.config" type="String">
@@ -662,144 +640,6 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="groups.config" type="String">
                 <esf:value>[{"name":"kura.permission.kura.wires.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin","basicMembers":["kura.user.appadmin","kura.user.netadmin"]},{"name":"kura.permission.kura.device","basicMembers":["kura.user.netadmin"]},{"name":"kura.permission.kura.packages.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.network.admin","basicMembers":["kura.user.netadmin"]},{"name":"kura.permission.rest.assets"}]</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
-	<esf:configuration pid="com.solidsense.kura.WirepasConfigurationService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="transportA.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportA.port" type="Integer">
-                <esf:value>1883</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.address" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.secured" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.user" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="customID" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportA.address" type="String">
-                <esf:value>192.168.1.21</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>com.solidsense.kura.WirepasConfigurationService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="microService.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportA.user" type="String">
-                <esf:value>solidsense</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.passwd" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportA.secured" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportA.passwd" type="String">
-                <esf:value>solidsense</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="gatewayID" type="String">
-                <esf:value>device</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="microService.global" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transportB.port" type="Integer">
-                <esf:value>1883</esf:value>
-            </esf:property>
-			<esf:property array="false" encrypted="false" name="transportA.options" type="String">
-			<esf:value></esf:value>
-			</esf:property>
-				<esf:property array="false" encrypted="false" name="transportB.options" type="String">
-					<esf:value></esf:value>
-			</esf:property>
-        </esf:properties>
-    </esf:configuration>
-	<esf:configuration pid="com.solidsense.kura.WirepasSinkConfigurationService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="sinkAddress" type="Integer">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>com.solidsense.kura.WirepasSinkConfigurationService</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
-	<esf:configuration pid="com.solidsense.kura.SolidsenseMqttService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="transport.passwd" type="String">
-                <esf:value>solidsense</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.autostart" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.user" type="String">
-                <esf:value>solidsense</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.hci2" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.obddongle" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.hci1" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.hci0" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.modemgps" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.obd" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="customID" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>com.solidsense.kura.SolidsenseMqttService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>com.solidsense.kura.SolidsenseMqttService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.address" type="String">
-                <esf:value>192.168.1.12</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.ble" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.port" type="Integer">
-                <esf:value>1883</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.options" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="gatewayID" type="String">
-                <esf:value>device</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="transport.secured" type="Boolean">
-                <esf:value>false</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
