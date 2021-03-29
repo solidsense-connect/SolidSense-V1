@@ -20,10 +20,21 @@ fi
 
 # Run the creation of the httpskeystore.ks
 if [ ! -f /opt/eclipse/kura/user/security/httpskeystore.ks ] ; then
-	$(keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks \
+	result="$(keytool -genkey -alias localhost -keyalg RSA -keysize 2048 \
+		-keystore /opt/eclipse/kura/user/security/httpskeystore.ks \
 		-deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" \
 		-ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign \
-		-ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit)
+		-ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit)"
+	res="$?"
+	if [ "${res}" -ne "0" ] ; then
+		logger --tag "keytool" "Failed with message: <${result}>"
+	fi
+fi
+
+# Check if kura_custom.properties is less than 5 bytes
+if [ "$(stat --format=%s "${KURA_CUSTOM_PROPERTIES}")" -le 5 ] ; then
+	cd "/opt/SolidSense/provisioning" || exit
+	python3 /opt/SolidSense/provisioning/RepairProvisionning.py | logger --tag "repairprovisioning" 2>&1
 fi
 
 # Update kura_custom.properties
