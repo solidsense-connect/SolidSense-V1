@@ -240,7 +240,7 @@ services:
     state: interactive
     parameters:
         configuration: SolidsenseMqttService
-        plugin: SolidsenseMqttService.dp  # To be further investigated why we shall have that only for the MQTT agent
+        plugin: SolidsenseMqttService_1.0.0.dp  # To be further investigated why we shall have that only for the MQTT agent
         plugin_name: SolidsenseMqttService
         system: solidsense_mqtt
         prefix: transport
