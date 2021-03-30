@@ -3,7 +3,6 @@
 # Kura should be installed to the /opt/eclipse directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
-KURA_CUSTOM_PROPERTIES_FILE="/opt/eclipse/kura/user/kura_custom.properties"
 
 # Run the SolidSense provisionning script.
 if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
@@ -29,12 +28,6 @@ if [ ! -f /opt/eclipse/kura/user/security/httpskeystore.ks ] ; then
 	if [ "${res}" -ne "0" ] ; then
 		logger --tag "keytool" "Failed with message: <${result}>"
 	fi
-fi
-
-# Check if kura_custom.properties is less than 5 bytes
-if [ "$(stat --format=%s "${KURA_CUSTOM_PROPERTIES}")" -le 5 ] ; then
-	cd "/opt/SolidSense/provisioning" || exit
-	python3 /opt/SolidSense/provisioning/RepairProvisionning.py | logger --tag "repairprovisioning" 2>&1
 fi
 
 # Update kura_custom.properties
@@ -107,6 +100,12 @@ END {
 	}
 }' "${KURA_CUSTOM_PROPERTIES_FILE}" > "${KURA_CUSTOM_PROPERTIES_FILE_TMP}"
 mv "${KURA_CUSTOM_PROPERTIES_FILE_TMP}" "${KURA_CUSTOM_PROPERTIES_FILE}"
+
+# Check if kura_custom.properties is less than 5 bytes
+if [ "$(stat --format=%s "${KURA_CUSTOM_PROPERTIES_FILE}")" -le 5 ] ; then
+	cd "/opt/SolidSense/provisioning" || exit
+	python3 /opt/SolidSense/provisioning/RepairProvisionning.py | logger --tag "repairprovisioning" 2>&1
+fi
 
 DIR=$(cd "$(dirname "${0}")/.." || exit; pwd)
 cd "$DIR" || exit
