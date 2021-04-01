@@ -199,12 +199,12 @@ class GlobalKuraConfig:
     def set_variable(self,keyword,value):
         self._variables[keyword]=value
 
-    def get_variable(self,key,default=None):
+    def get_variable(self, key, default=None):
         try:
             value=self._variables[key]
         except KeyError :
-            servlog.info("variable not defined:"+key)
-            value=default
+            servlog.info("variable not defined:%s taking default:%s" % (key, str(default)))
+            value = default
         return value
 
     def checkAndReplaceVar(self,value):
@@ -355,16 +355,37 @@ class GlobalKuraConfig:
         Generate the plugin reference file for Kura: dpa.properties
         '''
         # changes for Kura5 packages direct under kura
-        outdir=self.output_dir('/opt/eclipse/kura/packages')
-        output=os.path.join(outdir, 'dpa.properties')
-        plugin_dir='/opt/eclipse/kura/packages'
+        packages_dir = self.get_variable("KURA_PACKAGES", '/opt/eclipse/kura/packages')
+        outdir = self.output_dir(packages_dir)
+        output = os.path.join(outdir, 'dpa.properties')
+        plugin_dir = packages_dir
+        packages_list=[]
+        # now read the list of existing plugins
+        with os.scandir(packages_dir) as it:
+            for entry in it:
+                if entry.name.endswith('.dp'):
+                    print(entry.name)
+                    packages_list.append(entry.name)
+
+        def find_plugin(plugin_name):
+            for p in packages_list:
+                if p.startswith(plugin_name):
+                    return (p)
+            raise KeyError
+
         try:
-            fd=open(output,'w')
+            fd = open(output,'w')
         except IOError as err:
             servlog.error(" Cannot open plugin file:"+output+" "+str(err))
             return
         write_header(fd)
-        for plugin,plugin_file in self._plugins.items() :
+        for plugin, f in self._plugins.items():
+            try:
+                plugin_file = find_plugin(plugin)
+            except KeyError:
+                servlog.error("No plugin for:"+plugin)
+                continue
+
             filename=os.path.join(plugin_dir,plugin_file)
             fd.write(plugin)
             fd.write('=file\\:')

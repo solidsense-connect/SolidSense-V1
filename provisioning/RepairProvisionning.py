@@ -301,16 +301,17 @@ class SolidSenseConfig:
         Generate the plugin reference file for Kura: dpa.properties
         '''
         # changes for Kura5 packages direct under kura
-        outdir=self.output_dir('/opt/eclipse/kura/data')
+        outdir=self.output_dir('/opt/eclipse/kura/packages')
         output=os.path.join(outdir, 'dpa.properties')
-        plugin_dir='/opt/eclipse/kura/data/packages'
+        plugin_dir='/opt/eclipse/kura/packages'
         try:
             fd=open(output,'w')
         except IOError as err:
             servlog.error(" Cannot open plugin file:"+output+" "+str(err))
             return
         write_header(fd)
-        for plugin,plugin_file in self._plugins.items() :
+        for plugin,plugin_file in self._plugins.items():
+            servlog.info("Adding plugin:"+plugin)
             filename=os.path.join(plugin_dir,plugin_file)
             fd.write(plugin)
             fd.write('=file\\:')

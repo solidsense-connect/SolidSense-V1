@@ -249,6 +249,7 @@ class WirepasSink(KuraService):
 
     Sink_Keywords=("ADDRESS","NETWORK_ID","NETWORK_CHANNEL")
     Sink_Cmd={"NAME":'-s',"ADDRESS":"-n","NETWORK_ID":"-N","NETWORK_CHANNEL":"-c","START":"-S"}
+
     def __init__(self,kura_config,def_dict):
         KuraService.__init__(self,kura_config,def_dict)
         # self.dump_variables()
