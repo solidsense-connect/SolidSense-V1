@@ -20,7 +20,7 @@
 #   sink1 = hci1
 #
 #
-#  Copyright Sterwen-Technology/SolidRun 2019-2020
+#  Copyright Sterwen-Technology/SolidRun 2019-2021
 #
 #  **********************************************************
 #  *    WARNING                                             *
@@ -44,7 +44,7 @@ gateway:
     snapshot_0: snapshot_0-full.xml #this is the template snapshot do not change it unless full test
     WP_TEST_ID: 10450204
     WP_TEST_CHANNEL: 10
-    WP_PLUGIN: WirepasConfigurationService_1.3.0.dp
+    WP_PLUGIN: WirepasConfigurationService.dp
     
     
 #######################################################
