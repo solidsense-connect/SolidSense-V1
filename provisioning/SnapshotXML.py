@@ -11,6 +11,7 @@
 
 import logging
 import xml.etree.ElementTree as ET
+# import ElementTreeLoc as ET
 
 from provisioning_utils import *
 
@@ -50,9 +51,12 @@ class SnapshotFile:
             loclog.info('Missing configuration:' + name)
             return None
 
+    def getXMLconfigurations(self):
+        return self._root.findall(esf_tag('configuration'))
+
     def print_elements(self):
         for child in self._root:
-            print(child.tag)
+            print(child.tag,child.items())
 
     def write(self, filename):
         try:
@@ -76,8 +80,14 @@ class SnapshotFile:
     def merge_configurations(self, additionalXML):
         for c in additionalXML._configurations.values():
             self._configurations[c.name()]=c
+        # now merge the XML
+        cfs = additionalXML.getXMLconfigurations()
+        for c in cfs:
+            self._root.append(c)
 
 
+    def dump(self):
+        ET.dump(self._tree)
 
 class SnapshotConfiguration:
 
@@ -123,7 +133,7 @@ class SnapshotConfiguration:
             loclog.info(' Configuration:' + self._name + " property not found:" + name)
             p = None
         if p is None:
-            self .add_property(name, value)
+            self.add_property(name, value)
             return
         p.setvalue(value)
 

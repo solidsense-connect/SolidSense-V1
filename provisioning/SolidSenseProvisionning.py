@@ -26,8 +26,10 @@ from SnapshotXML import *
 #servlog=logging.getLogger('SolidSense-provisioning')
 servlog=None
 
+
 class ProvisioningException(Exception):
     pass
+
 
 class GlobalKuraConfig:
     '''
@@ -82,6 +84,9 @@ class GlobalKuraConfig:
         snap_ss = SnapshotFile(filename)
         self._snapshot.merge_configurations(snap_ss)
 
+    def snapshot(self):
+        return self._snapshot
+
     def rpmb_conf(self):
         if not os.path.exists("/etc/solidsense_device"):
             self.simul_rpmb()
@@ -100,16 +105,18 @@ class GlobalKuraConfig:
         fd.close()
         self._model = (self._partnum.split('.'))[0]
         num_model=int(self._model[3:])
-        if 100 < num_model < 200:
+        if 100 <= num_model < 200:
             servlog.info("Outdoor gateway detected")
             self._outdoor = True
-        elif 200 < num_model < 300:
+        elif 200 <= num_model < 300:
             servlog.info("Industrial gateway detected")
             self._industrial = True
 
-
     def isOutdoor(self):
         return self._outdoor
+
+    def isIndustrial(self):
+        return self._industrial
 
     def mender_conf(self):
         if os.path.exists("/etc/mender/artifact_info"):
@@ -279,6 +286,11 @@ class GlobalKuraConfig:
         filename=os.path.join(outdir,"snapshot_0.xml")
         self._snapshot.write(filename)
 
+    def compute_configuration(self):
+        servlog.info("*******Starting configuration computation*******")
+        for service in self._services.values():
+            service.configuration()
+
     def gen_configuration(self):
         '''
         generate the configuration for all services
@@ -288,10 +300,8 @@ class GlobalKuraConfig:
         kura_custom.properties
         kuranet.conf
         '''
-        servlog.info("*******Starting configuration computation*******")
-        for service in self._services.values() :
-            service.configuration()
 
+        self.compute_configuration()
         servlog.info("*******Starting file generation*******")
         self.gen_netconf()
         self.gen_snapshot0()
@@ -499,6 +509,7 @@ services_class = {
     "NetworkService": NetworkService,
     "WiFiService": WiFiService,
     # "EthernetService": EthernetService,
+    "FirewallService": FirewallService,
     "ModemGps": ModemGps,
     "PppService": PppService,
     "WirepasSink": WirepasSink,
@@ -506,7 +517,7 @@ services_class = {
     "WirepasMicroService": WirepasMicroService,
     "BluetoothService": BluetoothService,
     "BLEClientService": BLEClientService,
-    "MQTTService":MQTTService
+    "MQTTService": MQTTService
     }
 
 
@@ -542,7 +553,7 @@ def read_service_def(kgc_o,serv_file):
     # print (res)
     for s in services_def:
         service_def=s.get('service')
-        # print ("Instanciating:", service_def.get('type'))
+        print ("Instanciating:", service_def.get('type'))
         try:
             service_class_name=service_def['type']
         except KeyError:
@@ -558,7 +569,8 @@ def read_service_def(kgc_o,serv_file):
         except KeyError:
             servlog.error("Unknown service:"+service_class_name)
             continue
-        override=True
+
+        override = True
         try:
             override=service_def['override']
         except KeyError :
@@ -572,8 +584,12 @@ def read_service_def(kgc_o,serv_file):
                 servlog.info("combining Service:"+service_name)
                 service.combine(service_def)
 
-        if override :
-            service=service_class(kgc_o,service_def)
+        if override:
+            try:
+                service = service_class(kgc_o,service_def)
+            except Exception as e:
+                print(e)
+                continue
             servlog.info("adding Service:"+service_class_name+" name:"+service.name())
             kgc_o.add_service(service_name,service)
 
@@ -591,13 +607,17 @@ def main():
         config_dir='/opt/SolidSense/config'
         template_dir='/opt/SolidSense/template'
         custom_dir='/data/solidsense/config'
-        checkCreateDir(custom_dir)
+        try:
+            checkCreateDir(custom_dir)
+        except Exception as e:
+            print(e)
 
     global servlog
     master_file="SolidSense-conf-base.yml"
     master_file_default=True
     if len(sys.argv) > 1:
         option=sys.argv[1]
+        print("Running with option:", option)
         if len(sys.argv) > 2 :
             master_file=sys.argv[2]
             master_file_default=False
@@ -635,7 +655,7 @@ def main():
     # now check if we a custom configuration file
     custom_file = 'SolidSense-conf-custom.yml'
     '''
-    Application of the custome file search algorithm (issue 497)
+    Application of the custom file search algorithm (issue 497)
     First search in   /data/solidsense/config
     Then in /opt/SolidSense/config
     '''
@@ -651,22 +671,32 @@ def main():
 
     if cust_file is not None :
         servlog.info("Reading custom configuration file:"+cust_file)
-        if read_service_def(kgc,cust_file) :
+        if read_service_def(kgc,cust_file):
             servlog.info("Error in custom configuration file")
     else:
         servlog.info("No custom configuration file => proceeding with default")
     # generate secondary global variables
+    print("End yml analysis")
     kgc.gen_secondary_global()
     # trace the variables
     kgc.dump_variables()
-    if option is not None :
-        if option == "--syntax" :
+    if option is not None:
+        if option == "--syntax":
             servlog.info("******** Syntax check mode ** No configuration generated")
             loghandler.flush()
             return
 
     kgc.read_source_snapshot()
     # dump the properties found
+    if option is not None:
+        if option == "--test":
+            servlog.info("*****test mode")
+            kgc.snapshot().print_elements()
+            kgc.compute_configuration()
+            kgc.snapshot().print_elements()
+            loghandler.flush()
+            return
+
     kgc.dump_properties('initial')
     # check one or 2 for test
     # nserv=kgc.getSnapshot_conf('NetworkConfigurationService')

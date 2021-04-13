@@ -63,7 +63,7 @@ class PppService(NetworkService):
         kura_id=self._kura_config.get_variable('MODEM_KURAID')
         # check that we have an APN
         apn=self.variableValue("APN")
-        if apn == None or len(apn) < 2 :
+        if apn is None or len(apn) < 2 :
             loclog.error("Invalid APN - ppp not configured -APN="+str(apn))
             return
         #
@@ -151,11 +151,10 @@ class PppService(NetworkService):
                 add_secret_entry('pap-secrets')
 
 
-
 class ModemGps(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
-        SolidSenseService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
         if isWindows():
             kura_config.set_variable('MODEM_MODEL',"EC25")
             self._state='active'
@@ -245,6 +244,7 @@ class ModemGps(SolidSenseService):
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()

@@ -16,7 +16,7 @@ import json
 
 from provisioning_utils import *
 
-servlog=logging.getLogger('SolidSense-provisioning')
+servlog = logging.getLogger('SolidSense-provisioning')
 
 state_DISABLED='disabled'
 state_ACTIVE='active'
@@ -36,10 +36,10 @@ class SolidSenseService:
         self.validate_state(def_dict)
         self._parameters=def_dict.get('parameters',{})
         self._variables=def_dict.get('variables')
-        if self._variables == None :
+        if self._variables is None :
             self._variables={}
         self._properties=def_dict.get('properties')
-        if self._properties == None :
+        if self._properties is None :
             self._properties={}
 
         self._variables['service_name']=self._name
@@ -65,8 +65,9 @@ class SolidSenseService:
             self._state=def_dict['state']
         except KeyError:
             pass
+
         def merge_dict(dict1,dict2):
-            if dict2 == None:
+            if dict2 is None:
                 return
             for key,value in dict2.items():
                 dict1[key]=value
@@ -74,7 +75,6 @@ class SolidSenseService:
         merge_dict(self._parameters,def_dict.get('parameters',None))
         merge_dict(self._variables,def_dict.get('variables',None))
         merge_dict(self._properties,def_dict.get('properties',None))
-
 
     def dump_variables(self):
         servlog.info("Variables for service: "+self._name)
@@ -164,7 +164,7 @@ class SolidSenseService:
 class KuraService(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
-        SolidSenseService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
         try:
             self._snapshot_confname=self._parameters['configuration']
         except KeyError :
@@ -199,7 +199,7 @@ class KuraService(SolidSenseService):
 class NetworkService(KuraService):
 
     def __init__(self,kura_config,def_dict):
-        KuraService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         KuraService.configuration(self)
@@ -213,7 +213,7 @@ class NetworkService(KuraService):
 class WiFiService(NetworkService):
 
     def __init__(self,kura_config,def_dict):
-        NetworkService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         NetworkService.configuration(self)
@@ -245,13 +245,14 @@ class EthernetService(NetworkService):
 
 WirepasDataDir='/data/solidsense/wirepas'
 
+
 class WirepasSink(KuraService):
 
     Sink_Keywords=("ADDRESS","NETWORK_ID","NETWORK_CHANNEL")
     Sink_Cmd={"NAME":'-s',"ADDRESS":"-n","NETWORK_ID":"-N","NETWORK_CHANNEL":"-c","START":"-S"}
 
-    def __init__(self,kura_config,def_dict):
-        KuraService.__init__(self,kura_config,def_dict)
+    def __init__(self,kura_config, def_dict):
+        super().__init__(kura_config, def_dict)
         # self.dump_variables()
 
     def configuration(self):
@@ -285,9 +286,7 @@ class WirepasSink(KuraService):
                     return
                 servlog.info("Wirepas firmware found on "+self._name)
 
-
-        # self.configSink()
-        # sinks must be configured after starting the service
+  # sinks must be configured after starting the service
 
     def configSink(self):
 
@@ -316,14 +315,13 @@ class WirepasSink(KuraService):
             systemCtl('start','wirepasSinkConfig')
 
 
-
-
 class WirepasTransport(KuraService):
 
     # Transport_Keywords=("ADDRESS","PORT","USER","PASSWORD")
     Transport_Cmd={"ADDRESS":"host","PORT":"port","USER":"mqtt_username","PASSWORD":"mqtt_password"}
+
     def __init__(self,kura_config,def_dict):
-        KuraService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         self._service=self.parameterValue('system')
@@ -340,9 +338,9 @@ class WirepasTransport(KuraService):
         if self._state == state_INTERACTIVE :
             return
         # compute the gateway-id
-        gatewayID=self.parameterValue('gatewayID')
+        # gatewayID=self.parameterValue('gatewayID')
         customID= self.parameterValue('customID')
-        if customID != None :
+        if customID is not None:
             # highest priority
             self._gwid=customID
             self._snapconf.set_property('customID',customID)
@@ -362,7 +360,6 @@ class WirepasTransport(KuraService):
         # now generate the configuration files for the services
 
         self.gen_transport_conf()
-
 
     def gen_transport_conf(self):
         outdir=self._kura_config.output_dir(WirepasDataDir)
@@ -386,10 +383,11 @@ class WirepasTransport(KuraService):
         fd.write('full_python: false\n\n')
         fd.close()
 
+
 class WirepasMicroService(KuraService):
 
     def __init__(self,kura_config,def_dict):
-        KuraService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         if self._state == state_DISABLED :
@@ -423,15 +421,18 @@ class WirepasMicroService(KuraService):
 BluetoothDataDir='/data/solidsense/ble_gateway'
 MQTTDataDir='/data/solidsense/mqtt'
 
+
 class MQTTService (KuraService):
     Transport_Cmd={"address":"mqtt_hostname","port":"mqtt_port","user":"mqtt_username","passwd":"mqtt_password",
                     "secured": None}
     Default_Parameters= {'trace':'info'}
-    def __init__(self,kura_config,def_dict):
-        KuraService.__init__(self,kura_config,def_dict)
+
+    def __init__(self, kura_config, def_dict):
+        print("MQTT init")
+        super().__init__(kura_config, def_dict)
 
     def configuration(self):
-        self._service=self.parameterValue('system')
+        self._service = self.parameterValue('system')
         if self._state == state_DISABLED :
             checkAndRemoveFile(MQTTDataDir,self._service+'.service.cfg')
             return
@@ -447,7 +448,7 @@ class MQTTService (KuraService):
         # compute the gateway-id
         gatewayID=self.parameterValue('gatewayID')
         customID= self.parameterValue('customID')
-        if customID != None :
+        if customID is not None:
             # highest priority
             self._gwid=customID
             self._snapconf.set_property('customID',customID)
@@ -470,7 +471,7 @@ class MQTTService (KuraService):
             else:
                 param[key]=value
         outdir=self._kura_config.output_dir(MQTTDataDir)
-        file=os.path.join(outdir,'parameters.json')
+        file=os.path.join(outdir, 'parameters.json')
         try:
             fd=open(file,'w')
         except IOError as err:
@@ -484,7 +485,7 @@ class MQTTService (KuraService):
         # now activate the service
         servlog.debug('starting MQTT service:'+self._name+" "+self._state)
         if self._state != state_DISABLED:
-           systemCtl('enable',self._service)
+            systemCtl('enable',self._service)
         if self._state == state_ACTIVE :
             systemCtl('start',self._service)
 
@@ -498,7 +499,7 @@ class MQTTService (KuraService):
             return
         write_header(fd)
         sec= self.variableValue('SECURE')
-        if sec == None : sec = False
+        if sec is None: sec = False
         sec = not sec
 
         fd.write('gateway_id: '+self._gwid+'\n')
@@ -507,15 +508,14 @@ class MQTTService (KuraService):
         for prop,val in self._properties.items():
             try:
                 param=MQTTService.Transport_Cmd[prop]
-            except KeyError :
+            except KeyError:
                 param=prop
-            if param == None : continue
+            if param is None: continue
 
             fd.write(param)
             fd.write(": ")
             fd.write(str(self.variableValue(prop)))
             fd.write('\n')
-
 
         fd.close()
 
@@ -523,15 +523,14 @@ class MQTTService (KuraService):
 class BluetoothService(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
-        SolidSenseService.__init__(self,kura_config,def_dict)
-
+        super().__init__(kura_config,def_dict)
 
     def startService(self):
         # now activate the services for hci1 and hci2
         servlog.debug('starting Bluetooth service:'+self._name+" "+self._state)
         if self._state == state_ACTIVE:
             interface=self.parameterValue('port')
-            if interface == None: return
+            if interface is None: return
             if interface == 'ttymxc1':
                 systemCtl('enable','ble1')
                 systemCtl('start','ble1')
@@ -546,8 +545,9 @@ class BluetoothService(SolidSenseService):
 
 class BLEClientService(SolidSenseService):
     Default_Parameters= {'max_connect':10,'notif_MTU':63,'debug_bluez':False,'trace':'info','interface':'hci0'}
+
     def __init__(self,kura_config,def_dict):
-        SolidSenseService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         # self._service=self.parameterValue('system')
@@ -572,8 +572,154 @@ class BLEClientService(SolidSenseService):
         fd.write('\n')
         fd.close()
 
+
+class FirewallOpenPort():
+
+    def __init__(self, port, port_range=None, protocol='tcp', network=None, interface=None,
+                 forbidden_if=None, MAC_addr=None, source_port=None):
+        self._port = port
+        self._port_range = port_range
+        self._protocol = protocol
+        self._network = network
+        self._interface = interface
+        self._forbidden_if = forbidden_if
+        self._MAC_addr = MAC_addr
+        self._source_port = source_port
+
+    @staticmethod
+    def from_string(str_def:str):
+        tp = str_def.split(',')
+        if len(tp) < 7:
+            servlog.error("Firewall rule syntax error:%s" % str_def)
+            raise ValueError
+
+        try:
+            is_range=tp[0].index(':')
+        except ValueError:
+            port = int(tp[0])
+            last_port = None
+        else:
+            port = int(tp[0][:is_range])
+            last_port = int(tp[0][is_range+1:])
+
+        entry = FirewallOpenPort(port, port_range=last_port)
+        if len(tp[1]) > 0:
+            if tp[1] == 'udp':
+                entry._protocol = 'udp'
+        if len(tp[2]) > 0:
+            entry._network = tp[2]
+        if len(tp[3]) > 0:
+            entry._interface = tp[3]
+        if len(tp[4]) > 0:
+            entry._forbidden_if = tp[4]
+        if len(tp[5]) > 0:
+            entry._MAC_addr = tp[5]
+        if len(tp[6]) > 0:
+            entry._source_port = tp[6]
+        return entry
+
+    def as_string(self):
+        res = str(self._port)
+        if self._port_range is not None:
+            res += ":" + str(self._port_range)
+        res += ','
+        res += self._protocol
+        res += ','
+
+        def add_param(param):
+            r = ""
+            if param is not None:
+                r += param
+            r += ','
+            return r
+
+        res += add_param(self._network)
+        res += add_param(self._interface)
+        res += add_param(self._forbidden_if)
+        res += add_param(self._MAC_addr)
+        res += add_param(self._source_port)
+        return res
+
+    def network(self):
+        return self._network
+
+
+class FirewallService(KuraService):
+
+    def __init__(self, kura_config, def_dict):
+        super().__init__(kura_config, def_dict)
+        self._open_ports = []
+
+    def configuration(self):
+
+        super().configuration()
+        # if the firewall string is set then we just replace
+        if self.asParameter('firewall_def'):
+            self._snapconf.set_property('firewall.open.ports', self.parameterValue('firewall_def'))
+            return
+
+        open_ports = self._snapconf.get_property('firewall.open.ports').getvalue()
+        allowed_networks = self.parameterValue('allowed_networks')
+        if allowed_networks is not None:
+            allowed_networks = allowed_networks.split(',')
+        servlog.debug("allowed networks:"+str(allowed_networks))
+        entries = open_ports.split(';')
+        for e in entries:
+            try:
+                op = FirewallOpenPort.from_string(e)
+            except Exception as e:
+                print(e)
+            self._open_ports.append(op)
+
+        # entries cleanup
+        to_be_removed = []
+        for op in self._open_ports:
+            if op.network() is None:
+                continue
+            is_valid = False
+            if allowed_networks is not None:
+                for n in allowed_networks:
+                    if op.network() == n:
+                        is_valid = True
+                        break
+            if is_valid:
+                continue
+            to_be_removed.append(op)
+
+        for op in to_be_removed:
+            servlog.debug("removing port:"+op.as_string())
+            self._open_ports.remove(op)
+        #
+        # if on industrial add eth1
+        if self._kura_config.isIndustrial():
+            dns_port = FirewallOpenPort(53,protocol='udp',interface='eth1')
+            dhcp_port = FirewallOpenPort(63,protocol='udp',interface='eth1')
+            https_port = FirewallOpenPort(443,protocol='tcp',interface='eth1')
+            https2_port = FirewallOpenPort(4443, protocol='tcp', interface='eth1')
+            self._open_ports.append(dns_port)
+            self._open_ports.append(dhcp_port)
+            self._open_ports.append(https_port)
+            self._open_ports.append(https2_port)
+
+        self.set_firewall_string()
+
+    def set_firewall_string(self):
+        res = ""
+        for op in self._open_ports:
+            res += op.as_string()
+            res += '#;'
+        servlog.debug(res[:len(res)-1])
+        self._snapconf.set_property('firewall.open.ports', res[:len(res)-1])
+
+
+
+
+
+
+
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()

@@ -71,6 +71,11 @@ services:
         configuration: CommandCloudApp
     properties:
         command.enable: true
+        privileged.command.service.enable: true
+        # command.working.directory:
+        # command.environment:
+        command.timeout: 120
+        # command.password.value
 
 - service:
     # Local loop
@@ -116,7 +121,6 @@ services:
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
-        state: active
     variables:
         WPA_KEYMGMT: WPA-PSK
         WIFI_PASSWORD: testKEYS
@@ -142,7 +146,18 @@ services:
         config.dhcpServer4.enabled: true
         config.dhcpServer4.rangeStart: 172.16.1.100
         config.dhcpServer4.rangeEnd: 172.16.1.115
-
+#
+# Firewall
+#
+- service:
+    type: FirewallService
+    name: firewall
+    state: active
+    parameters:
+        configuration: FirewallConfigurationService
+        allowed_networks: "127.0.0.1/32"
+        #firewall_def: "Firewall definition string (see Kura)"
+        
 #
 #   Modem/GPS service
 #
@@ -240,7 +255,7 @@ services:
     state: interactive
     parameters:
         configuration: SolidsenseMqttService
-        plugin: SolidsenseMqttService_1.0.0.dp  # To be further investigated why we shall have that only for the MQTT agent
+        plugin: SolidsenseMqttService.dp  # To be further investigated why we shall have that only for the MQTT agent
         plugin_name: SolidsenseMqttService
         system: solidsense_mqtt
         prefix: transport
