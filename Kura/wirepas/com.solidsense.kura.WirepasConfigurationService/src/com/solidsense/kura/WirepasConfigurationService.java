@@ -163,8 +163,9 @@ public class WirepasConfigurationService implements ConfigurableComponent {
             writer.write("# User options\n");
             writer.write(userOptions);
             writer.write("\n\n");
+            writer.write("# End\n");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -192,17 +193,22 @@ public class WirepasConfigurationService implements ConfigurableComponent {
     }
 
     private void executeSystemCtl(String command, String service) {
+    	s_logger.info("execute: systemctl " + command + " " + service);
         final ProcessBuilder pb = new ProcessBuilder("systemctl", command, service);
 
         File log = new File(PATH_BASE + "systemctl.log");
+        log.setLastModified(System.currentTimeMillis());
+
         pb.redirectErrorStream(true);
         pb.redirectOutput(Redirect.appendTo(log));
 
         try {
             Process p = pb.start();
             p.waitFor();
+            s_logger.info("execute: done");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
     }
 }

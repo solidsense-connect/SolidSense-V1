@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="com.solidsense.kura.WirepasStatusService"
+        name="Wirepas Data Status"
+        description="">
+        
+        <Icon resource="OSGI-INF/icon.png" size="16"/>
+
+    </OCD>
+
+    <Designate pid="com.solidsense.kura.WirepasStatusService">
+        <Object ocdref="com.solidsense.kura.WirepasStatusService"/>
+    </Designate>
+</MetaData>
