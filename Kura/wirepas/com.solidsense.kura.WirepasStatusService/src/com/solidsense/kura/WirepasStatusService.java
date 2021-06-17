@@ -132,15 +132,27 @@ public class WirepasStatusService implements SelfConfiguringComponent {
         /* ********************** */
         tad = objectFactory.createTad();
         tad.setId(serviceName + ".status");
-        tad.setName("Status of " + transportName);
+        tad.setName("Status of " + transportName + " connection");
         tad.setType(Tscalar.STRING);
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setMax("");
         tad.setMin("");
-        tad.setDescription("Status provided by systemD|TextArea");
+        tad.setDescription("");
         tocd.addAD(tad);
-        props.put(serviceName + ".status", getServiceStatus(serviceName));
+        props.put(serviceName + ".status", getConnectionStatus(serviceName));
+
+        tad = objectFactory.createTad();
+        tad.setId(serviceName + ".systemd");
+        tad.setName("Status of " + transportName + " service (SystemD)");
+        tad.setType(Tscalar.STRING);
+        tad.setCardinality(0);
+        tad.setRequired(false);
+        tad.setMax("");
+        tad.setMin("");
+        tad.setDescription("|TextArea");
+        tocd.addAD(tad);
+        props.put(serviceName + ".systemd", getServiceStatus(serviceName));
 
     }
 
@@ -171,6 +183,23 @@ public class WirepasStatusService implements SelfConfiguringComponent {
         } catch (Exception e) {
             s_logger.error(e.toString());
         }
+    }
+
+    /* ************************************************************************************************************** */
+    private String getConnectionStatus(String service) {
+        /* parse the status file */
+        try (BufferedReader reader = new BufferedReader(new FileReader(PATH_BASE + service + ".status"))) {
+            String line = reader.readLine();
+
+            if (line != null) {
+                return line;
+            }
+
+        } catch (IOException e) {
+            s_logger.error(e.toString());
+        }
+
+        return "NOT CONNECTED";
     }
 
     /* ************************************************************************************************************** */

@@ -121,7 +121,8 @@ public class WirepasConfigurationService implements ConfigurableComponent {
      * 
      */
 
-    private void updateConf(Map<String, Object> properties, String prefix, String service, String gatewayName, boolean fullOptions) {
+    private void updateConf(Map<String, Object> properties, String prefix, String service, String gatewayName,
+            boolean mainTransport) {
 
         String address = (String) properties.get(prefix + ".address");
         Integer port = (Integer) properties.get(prefix + ".port");
@@ -130,9 +131,9 @@ public class WirepasConfigurationService implements ConfigurableComponent {
         Boolean secure = (Boolean) properties.get(prefix + ".secured");
         Boolean persist = (Boolean) properties.get(prefix + ".persist");
         String userOptions = (String) properties.get(prefix + ".options");
-        
-        Integer maxPackets = (fullOptions) ? (Integer) properties.get(prefix + ".maxpacket") : 0;
-    	Integer maxDelay   = (fullOptions) ? (Integer) properties.get(prefix + ".maxdelay")  : 0;
+
+        Integer maxPackets = (mainTransport) ? (Integer) properties.get(prefix + ".maxpacket") : 0;
+        Integer maxDelay = (mainTransport) ? (Integer) properties.get(prefix + ".maxdelay") : 0;
 
         try (FileWriter writer = new FileWriter(PATH_BASE + service + ".cfg")) {
 
@@ -149,17 +150,21 @@ public class WirepasConfigurationService implements ConfigurableComponent {
             if (gatewayName != null) {
                 writer.write("gateway_id: " + gatewayName + "\n");
             }
+            if (mainTransport) {
+                writer.write("status_led: 1\n");
+            }
+            writer.write("status_file: " + PATH_BASE + service + ".status" + "\n");
             writer.write("\n");
 
             writer.write("# Implementation options\n");
             writer.write("full_python: False\n");
             writer.write("\n");
-            
+
             writer.write("# Black-Hole detection options\n");
             writer.write("buffering_max_buffered_packets: " + maxPackets + "\n");
             writer.write("buffering_max_delay_without_publish: " + maxDelay + "\n");
             writer.write("\n");
-            
+
             writer.write("# User options\n");
             writer.write(userOptions);
             writer.write("\n\n");
@@ -193,7 +198,7 @@ public class WirepasConfigurationService implements ConfigurableComponent {
     }
 
     private void executeSystemCtl(String command, String service) {
-    	s_logger.info("execute: systemctl " + command + " " + service);
+        s_logger.info("execute: systemctl " + command + " " + service);
         final ProcessBuilder pb = new ProcessBuilder("systemctl", command, service);
 
         File log = new File(PATH_BASE + "systemctl.log");
@@ -209,6 +214,6 @@ public class WirepasConfigurationService implements ConfigurableComponent {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
     }
 }
