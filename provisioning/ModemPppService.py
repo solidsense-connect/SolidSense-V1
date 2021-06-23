@@ -31,7 +31,7 @@ except ImportError :
 
 from provisioning_utils import *
 
-loclog=logging.getLogger('SolidSense-provisioning')
+loclog = logging.getLogger('SolidSense-provisioning')
 
 
 class PppService(NetworkService):

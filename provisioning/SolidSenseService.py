@@ -248,8 +248,9 @@ WirepasDataDir='/data/solidsense/wirepas'
 
 class WirepasSink(KuraService):
 
-    Sink_Keywords=("ADDRESS","NETWORK_ID","NETWORK_CHANNEL")
-    Sink_Cmd={"NAME":'-s',"ADDRESS":"-n","NETWORK_ID":"-N","NETWORK_CHANNEL":"-c","START":"-S"}
+    Sink_Keywords=("ADDRESS","NETWORK_ID","NETWORK_CHANNEL","CIPHER_KEY","AUTH_KEY")
+    Sink_Cmd={"NAME":'-s',"ADDRESS":"-n","NETWORK_ID":"-N","NETWORK_CHANNEL":"-c","START":"-S",
+              "CIPHER_KEY": "-ck", "AUTH_KEY": "-ck"}
 
     def __init__(self,kura_config, def_dict):
         super().__init__(kura_config, def_dict)
@@ -292,13 +293,29 @@ class WirepasSink(KuraService):
 
         # write the configuration file
         outdir=self._kura_config.output_dir(WirepasDataDir)
-        fd=open(os.path.join(outdir,'wirepasSinkConfig.service.cfg'),'w')
+        filename = os.path.join(outdir, 'wirepasSinkConfig.service.cfg')
+        try:
+            fd=open(filename, 'w')
+        except IOError as e:
+            servlog.error(filename+':'+str(e))
+            return
+
         # write_header(fd)
-        fd.write(WirepasSink.Sink_Cmd['NAME']+'='+self._name+'\n')
-        for k in WirepasSink.Sink_Keywords :
-            fd.write(WirepasSink.Sink_Cmd[k]+'='+str(self.variableValue(k))+'\n')
-        fd.write(WirepasSink.Sink_Cmd['START']+'='+bool2str(self._parameters.get('start',False))+'\n')
-        fd.close
+        servlog.debug("Generating "+filename)
+        fd.write('set\n')
+        cmd = WirepasSink.Sink_Cmd['NAME']+'='+self._name
+        servlog.debug(cmd)
+        fd.write(cmd + '\n')
+        fd.write("-r=sink csma-ca\n")
+        for k in WirepasSink.Sink_Keywords:
+            if self.asVariable(k):
+                cmd = WirepasSink.Sink_Cmd[k]+'='+str(self.variableValue(k))
+                fd.write(cmd + '\n')
+                servlog.debug(cmd)
+        cmd = WirepasSink.Sink_Cmd['START']+'='+bool2str(self._parameters.get('start', False))
+        fd.write(cmd + '\n')
+        servlog.debug(cmd)
+        fd.close()
 
     def startService(self):
         servlog.debug('starting sink service:'+self._name+" "+self._state)
@@ -312,13 +329,14 @@ class WirepasSink(KuraService):
                 # wait to allow the system to start
                 time.sleep(1.0)
             self.configSink()
-            systemCtl('start','wirepasSinkConfig')
+            systemCtl('start', 'wirepasSinkConfig')
 
 
 class WirepasTransport(KuraService):
 
     # Transport_Keywords=("ADDRESS","PORT","USER","PASSWORD")
-    Transport_Cmd={"ADDRESS":"host","PORT":"port","USER":"mqtt_username","PASSWORD":"mqtt_password"}
+    Transport_Cmd={"ADDRESS":"host","PORT":"port","USER":"mqtt_username","PASSWORD":"mqtt_password",
+                   "MAX_DElAY": "buffering_max_delay_without_publish", "MAX_PACKET": "buffering_max_buffered_packets"}
 
     def __init__(self,kura_config,def_dict):
         super().__init__(kura_config,def_dict)
@@ -354,6 +372,10 @@ class WirepasTransport(KuraService):
             self._snapconf.set_property('gatewayID','device')
             self._gwid=self.variableValue('SERIAL-NUMBER')
 
+        if not self.asVariable('MAX_DELAY'):
+            self._snapconf.set_property('maxdelay', 0)
+        if not self.asVariable('MAX_PACKET'):
+            self._snapconf.set_property('maxpacket',0)
 
         # print('gateway ID=',self._gwid)
 
@@ -362,7 +384,7 @@ class WirepasTransport(KuraService):
         self.gen_transport_conf()
 
     def gen_transport_conf(self):
-        outdir=self._kura_config.output_dir(WirepasDataDir)
+        outdir = self._kura_config.output_dir(WirepasDataDir)
         file=os.path.join(outdir,self._service+'.service.cfg')
         try:
             fd=open(file,'w')
@@ -376,11 +398,18 @@ class WirepasTransport(KuraService):
             fd.write(str(self.variableValue(c[0])))
             fd.write('\n')
         sec= self.variableValue('SECURE')
-        if sec == None : sec = False
+        if sec is None: sec = False
         sec = not sec
         fd.write('unsecure_authentication: '+bool2str(sec)+'\n')
         fd.write('gateway_id: '+self._gwid+'\n')
         fd.write('full_python: false\n\n')
+        if self.asParameter('led'):
+            fd.write("status_led: ")
+            fd.write(str(self.variableValue('led')))
+            fd.write('\n')
+        else:
+            fd.write("status_led: 1\n")
+        fd.write("status_file: /data/solidsense/wirepas/wirepasTransport1.service.status\n")
         fd.close()
 
 
@@ -643,6 +672,18 @@ class FirewallOpenPort():
     def network(self):
         return self._network
 
+    def __lt__(self, other):
+        if self._port < other._port:
+            return True
+        elif self._port > other._port :
+            return False
+        if self._network is None:
+            return False
+        if self._network < other._network:
+            return True
+        else:
+            return False
+
 
 class FirewallService(KuraService):
 
@@ -653,6 +694,7 @@ class FirewallService(KuraService):
     def configuration(self):
 
         super().configuration()
+        servlog.info("Firewall configuration")
         # if the firewall string is set then we just replace
         if self.asParameter('firewall_def'):
             self._snapconf.set_property('firewall.open.ports', self.parameterValue('firewall_def'))
@@ -701,6 +743,10 @@ class FirewallService(KuraService):
             self._open_ports.append(https_port)
             self._open_ports.append(https2_port)
 
+        try:
+            self._open_ports.sort()
+        except Exception as e:
+            print(e)
         self.set_firewall_string()
 
     def set_firewall_string(self):

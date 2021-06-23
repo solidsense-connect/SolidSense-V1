@@ -304,6 +304,7 @@ class GlobalKuraConfig:
         self.compute_configuration()
         servlog.info("*******Starting file generation*******")
         self.gen_netconf()
+        self.gen_dhcpconf()
         self.gen_snapshot0()
         self.gen_properties()
 
@@ -360,6 +361,16 @@ class GlobalKuraConfig:
         fd.write("net.interfaces="+interfaces+'\n')
         fd.close()
 
+    def gen_dhcpconf(self):
+        '''
+        Generate the dhclient.conf file
+        '''
+        fd = open('/etc/dhcp/dhclient.conf', 'w')
+        dhconf = 'send host-name "%s";\n' % self._sernum
+        fd.write(dhconf)
+        fd.close()
+
+
     def gen_plugin(self):
         '''
         Generate the plugin reference file for Kura: dpa.properties
@@ -408,7 +419,7 @@ class GlobalKuraConfig:
         generate the global variables that can depends on other variables
         '''
         prefix_s=self.variableValue('ADDRESS_PREFIX')
-        if prefix_s == None :
+        if prefix_s is None :
             prefix=0
         else:
             try:
@@ -418,12 +429,11 @@ class GlobalKuraConfig:
         if prefix < 0 or prefix > 15 :
             servlog.error("ADDRESS_PREFIX must be in range [0-15]")
             prefix=0
-        addrb= (self._id << 1) + (prefix << 20)
+        addrb = (self._id << 1) + (prefix << 20)
         # print("ADDRESS0: %08X"%addrb)
         self.set_variable('UNIQUE_ADDRESS0',addrb)
         self.set_variable('UNIQUE_ADDRESS1',addrb+1)
         self.set_variable('AUTO_PASSWORD','_%_'+self._sernum[5:]+'#;.&"%')
-
 
     def dump_variables(self):
         servlog.info("****** Declared variables and values *******")
@@ -438,7 +448,7 @@ class GlobalKuraConfig:
 
     def gen_from_template(self,service,category,infile,output_file):
         tf=self.template(category,infile)
-        if tf != None :
+        if tf is not None:
             self.genconfigfile(service,tf,output_file)
 
     def genconfigfile(self,service,template,output_file):
@@ -691,9 +701,7 @@ def main():
     if option is not None:
         if option == "--test":
             servlog.info("*****test mode")
-            kgc.snapshot().print_elements()
             kgc.compute_configuration()
-            kgc.snapshot().print_elements()
             loghandler.flush()
             return
 
