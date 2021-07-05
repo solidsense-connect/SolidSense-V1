@@ -58,20 +58,6 @@ services:
 #   Variables are here for reference and example and are not used in interactive mode
 #
 - service:
-    # MQTT connection to Kapua
-    type: KuraService
-    name: KapuaMQTT
-    state: active
-    override: false
-    
-    properties:
-        
-        topic.context.account-name: SOLIDSENSE-TEST
-        username: solidrun-internal
-        password: ^$SolidSense2019$
-        
-
-- service:
     type: WirepasSink
     name: sink1
     state: active
