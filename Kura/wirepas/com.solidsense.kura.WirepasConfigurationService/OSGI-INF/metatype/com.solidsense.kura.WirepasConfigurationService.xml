@@ -53,6 +53,14 @@
             default="false" 
             description="Enable/Disable message buffering in the MQTT broker"/>
 
+        <AD id="transportA.websocket"  
+            name="Main MQTT transport uses WebSocket"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable WebSocket connection to the MQTT broker"/>
+
         <AD id="transportA.address"
             name="Main Broker address"
             type="String"
@@ -135,6 +143,14 @@
             required="false"
             default="false" 
             description="Enable/Disable message buffering in the MQTT broker"/>            
+
+        <AD id="transportB.websocket"  
+            name="Optional MQTT transport uses WebSocket"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="Enable/Disable WebSocket connection to the MQTT broker"/>
 
 	   <AD id="transportB.address"
             name="Optional Broker address"

@@ -124,6 +124,7 @@ public class WirepasConfigurationService implements ConfigurableComponent {
     private void updateConf(Map<String, Object> properties, String prefix, String service, String gatewayName,
             boolean mainTransport) {
 
+        Boolean websocket = (Boolean) properties.get(prefix + ".websocket");
         String address = (String) properties.get(prefix + ".address");
         Integer port = (Integer) properties.get(prefix + ".port");
         String user = (String) properties.get(prefix + ".user");
@@ -144,12 +145,16 @@ public class WirepasConfigurationService implements ConfigurableComponent {
             writer.write("mqtt_password: " + pass + "\n");
             writer.write("mqtt_force_unsecure: " + (secure ? "False" : "True") + "\n");
             writer.write("mqtt_persist_session: " + (persist ? "True" : "False") + "\n");
+            writer.write("mqtt_use_websocket: " + (websocket ? "True" : "False") + "\n");
             writer.write("\n");
 
             writer.write("# Gateway settings\n");
             if (gatewayName != null) {
                 writer.write("gateway_id: " + gatewayName + "\n");
             }
+            writer.write("gateway_model: " + systemService.getModelName() + "\n");
+            writer.write("gateway_version: " + systemService.getFirmwareVersion() + "\n");
+
             if (mainTransport) {
                 writer.write("status_led: 1\n");
             }
