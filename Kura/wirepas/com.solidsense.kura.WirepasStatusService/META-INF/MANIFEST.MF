@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.solidsense.kura.status
+Bundle-SymbolicName: com.solidsense.kura.status;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: SOLIDSENSE
+Automatic-Module-Name: com.solidsense.kura.WirepasStatusService
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.eclipse.kura;version="1.1.0",
+ org.eclipse.kura.configuration;version="1.1.2",
+ org.eclipse.kura.core.configuration;version="1.1.0",
+ org.eclipse.kura.core.configuration.metatype;version="1.0.0",
+ org.osgi.service.component;version="1.1.0",
+ org.slf4j;version="1.0.0"
+Service-Component: OSGI-INF/component.xml
+Bundle-ActivationPolicy: lazy

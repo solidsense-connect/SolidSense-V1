@@ -51,27 +51,23 @@ services:
 
 
 #
-#   Bluetooth services => only one can be active
 #
 #   hci0 on TI WL1831 on internal interface
-#   to be configured via Kura
+#  Configured by default
 #      
 - service:
     type: BluetoothService
     name: hci1
     state: active
     parameters:
-        interface: $service_name
-        port: ttymxc2
-        
--service:
-    type: BLEClientService
-    name: BLE-Client
+        interface: ttymxc1
+ 
+- service:
+    type: BluetoothService
+    name: hci2
+    state: active
     parameters:
-        interface: hci1
-        max_connect: 10
-        notif_mtu: 63
-        trace: info
-        debug_bluez: false
+        interface: ttymxc2        
+
     
 

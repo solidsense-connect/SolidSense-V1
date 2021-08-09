@@ -880,7 +880,7 @@ def _namespaces(elem, default_namespace=None):
     # populate qname and namespaces table
     for elem in elem.iter():
         tag = elem.tag
-        print('namespace tag=',tag)
+        # print('namespace tag=',tag)
         if isinstance(tag, QName):
             if tag.text not in qnames:
                 add_qname(tag.text)
@@ -905,6 +905,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):
     tag = elem.tag
     text = elem.text
+    # print("Serialize:",tag,text)
     if tag is Comment:
         write("<!--%s-->" % text)
     elif tag is ProcessingInstruction:

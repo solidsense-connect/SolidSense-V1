@@ -9,8 +9,14 @@
 # Licence:     Eclipse Public License 1.0
 #-------------------------------------------------------------------------------
 import os, sys, inspect
-# cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "../modem_gps")))
-sys.path.insert(0, '/opt/SolidSense/modem_gps')
+pathhead=os.path.split(inspect.getfile( inspect.currentframe() ))[0]
+print (pathhead)
+if pathhead == '/opt/SolidSense/provisioning' :
+    sys.path.insert(0, '/opt/SolidSense/modem_gps')
+else:
+    cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "../../modem_gps")))
+    sys.path.insert(0, cmd_subfolder)
+# 
 
 import json
 import logging
@@ -20,23 +26,22 @@ from SolidSenseService import *
 try:
     from QuectelAT_Service import *
 except ImportError :
-    pass
+    print("Error importing QuectelAT_Service")
+    
 
 from provisioning_utils import *
 
-loclog=logging.getLogger('SolidSense-provisioning')
+loclog = logging.getLogger('SolidSense-provisioning')
 
 
 class PppService(NetworkService):
 
     def __init__(self,kura_config,def_dict):
-        NetworkService.__init__(self,kura_config,def_dict)
-
-
+        super().__init__(kura_config,def_dict)
 
     def configuration(self):
         modem=self._kura_config.get_service('modem_gps')
-        if modem == None:
+        if modem is None:
             self._state=state_DISABLED
             loclog.error("Ppp Service => No supporting modem service")
             self._valid = False
@@ -44,16 +49,21 @@ class PppService(NetworkService):
             self._valid = modem.valid()
             if not self._valid :
                 loclog.error('Ppp Service => No valid modem')
+                self._state=state_DISABLED
 
-        if not self._valid :
-            return
         if self._state == state_DISABLED :
-            return
-        NetworkService.configuration(self)
+            self.addProperty('config.ip4.status','netIPv4StatusDisabled')
+        
+        loclog.info("Starting ppp service configuration for:"+self._name)
+        
+        super().configuration()
+        if self._state == state_DISABLED :
+            return 
+        
         kura_id=self._kura_config.get_variable('MODEM_KURAID')
         # check that we have an APN
         apn=self.variableValue("APN")
-        if apn == None or len(apn) < 2 :
+        if apn is None or len(apn) < 2 :
             loclog.error("Invalid APN - ppp not configured -APN="+str(apn))
             return
         #
@@ -116,12 +126,11 @@ class PppService(NetworkService):
             except IOError as err:
                 servlog.error(str(err))
                 return
-            line="%s\t*\t%s\t*\t#%s\n"%(user,passwd,model)
+            line="%s\t*\t%s\t*\t#%s\n"%(user, passwd, model)
             fd.write(line)
             fd.close()
 
-
-        if self.asVariable('APN_AUTH') :
+        if self.asVariable('APN_AUTH'):
             auth=self.variableValue('APN_AUTH')
             gen_pap=False
             gen_chap=False
@@ -142,11 +151,10 @@ class PppService(NetworkService):
                 add_secret_entry('pap-secrets')
 
 
-
 class ModemGps(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
-        SolidSenseService.__init__(self,kura_config,def_dict)
+        super().__init__(kura_config,def_dict)
         if isWindows():
             kura_config.set_variable('MODEM_MODEL',"EC25")
             self._state='active'
@@ -154,10 +162,12 @@ class ModemGps(SolidSenseService):
             kura_config.set_variable('MODEM_KURAID',"EC25_2-1.2")
         else:
 
-            if QuectelModem.checkModemPresence() :
+            mdm_usb=QuectelModem.checkModemPresence()
+            if mdm_usb is None :
                 self._valid=False
                 return
-
+            loclog.info('Modem service => modem found:'+str(mdm_usb))
+            
             tty1=self.parameterValue('modem_ctrl')
             if not os.path.exists(tty1) :
                 loclog.error('Modem service => TTY control file not existing:'+tty1)
@@ -182,8 +192,11 @@ class ModemGps(SolidSenseService):
             #
             #  now get the parameters
             #
-
-            modem_kura_id=modem.model()+"_"+mdm_usb['dev_path']
+            # special case for Quectel EC25 => EX25 in Kura
+            mdm_model = modem.model()
+            if mdm_model == "EC25":
+                mdm_model = "EX25"
+            modem_kura_id = mdm_model +"_"+mdm_usb['dev_path']
 
             kura_config.set_variable('MODEM_MFG',modem.manufacturer())
             kura_config.set_variable('MODEM_MODEL',modem.model())
@@ -231,6 +244,7 @@ class ModemGps(SolidSenseService):
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()

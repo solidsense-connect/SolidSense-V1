@@ -3,7 +3,7 @@
    <implementation class="com.solidsense.kura.WirepasSinkConfigurationService"/>
    <property name="service.pid" type="String" value="com.solidsense.kura.WirepasSinkConfigurationService"/>
    <service>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    
 </scr:component>

@@ -121,8 +121,10 @@ public class WirepasConfigurationService implements ConfigurableComponent {
      * 
      */
 
-    private void updateConf(Map<String, Object> properties, String prefix, String service, String gatewayName, boolean fullOptions) {
+    private void updateConf(Map<String, Object> properties, String prefix, String service, String gatewayName,
+            boolean mainTransport) {
 
+        Boolean websocket = (Boolean) properties.get(prefix + ".websocket");
         String address = (String) properties.get(prefix + ".address");
         Integer port = (Integer) properties.get(prefix + ".port");
         String user = (String) properties.get(prefix + ".user");
@@ -130,9 +132,9 @@ public class WirepasConfigurationService implements ConfigurableComponent {
         Boolean secure = (Boolean) properties.get(prefix + ".secured");
         Boolean persist = (Boolean) properties.get(prefix + ".persist");
         String userOptions = (String) properties.get(prefix + ".options");
-        
-        Integer maxPackets = (fullOptions) ? (Integer) properties.get(prefix + ".maxpacket") : 0;
-    	Integer maxDelay   = (fullOptions) ? (Integer) properties.get(prefix + ".maxdelay")  : 0;
+
+        Integer maxPackets = (mainTransport) ? (Integer) properties.get(prefix + ".maxpacket") : 0;
+        Integer maxDelay = (mainTransport) ? (Integer) properties.get(prefix + ".maxdelay") : 0;
 
         try (FileWriter writer = new FileWriter(PATH_BASE + service + ".cfg")) {
 
@@ -143,28 +145,37 @@ public class WirepasConfigurationService implements ConfigurableComponent {
             writer.write("mqtt_password: " + pass + "\n");
             writer.write("mqtt_force_unsecure: " + (secure ? "False" : "True") + "\n");
             writer.write("mqtt_persist_session: " + (persist ? "True" : "False") + "\n");
+            writer.write("mqtt_use_websocket: " + (websocket ? "True" : "False") + "\n");
             writer.write("\n");
 
             writer.write("# Gateway settings\n");
             if (gatewayName != null) {
                 writer.write("gateway_id: " + gatewayName + "\n");
             }
+            writer.write("gateway_model: " + systemService.getModelName() + "\n");
+            writer.write("gateway_version: " + systemService.getFirmwareVersion() + "\n");
+
+            if (mainTransport) {
+                writer.write("status_led: 1\n");
+            }
+            writer.write("status_file: " + PATH_BASE + service + ".status" + "\n");
             writer.write("\n");
 
             writer.write("# Implementation options\n");
             writer.write("full_python: False\n");
             writer.write("\n");
-            
+
             writer.write("# Black-Hole detection options\n");
             writer.write("buffering_max_buffered_packets: " + maxPackets + "\n");
             writer.write("buffering_max_delay_without_publish: " + maxDelay + "\n");
             writer.write("\n");
-            
+
             writer.write("# User options\n");
             writer.write(userOptions);
             writer.write("\n\n");
+            writer.write("# End\n");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -192,17 +203,22 @@ public class WirepasConfigurationService implements ConfigurableComponent {
     }
 
     private void executeSystemCtl(String command, String service) {
+        s_logger.info("execute: systemctl " + command + " " + service);
         final ProcessBuilder pb = new ProcessBuilder("systemctl", command, service);
 
         File log = new File(PATH_BASE + "systemctl.log");
+        log.setLastModified(System.currentTimeMillis());
+
         pb.redirectErrorStream(true);
         pb.redirectOutput(Redirect.appendTo(log));
 
         try {
             Process p = pb.start();
             p.waitFor();
+            s_logger.info("execute: done");
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

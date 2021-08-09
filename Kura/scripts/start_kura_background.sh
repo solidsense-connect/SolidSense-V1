@@ -1,14 +1,33 @@
-#!/bin/sh
+#!/bin/bash
 
 # Kura should be installed to the /opt/eclipse directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
-KURA_CUSTOM_PROPERTIES_FILE="/opt/eclipse/kura/user/kura_custom.properties"
 
 # Run the SolidSense provisionning script.
 if [ ! -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ] ; then
 	cd "/opt/SolidSense/provisioning" || exit
+	rm -f /var/log/kura.log
 	python3 /opt/SolidSense/provisioning/SolidSenseProvisionning.py | logger --tag "provisioning" 2>&1
+	res="${PIPESTATUS[0]}"
+	echo "Result of provisioning:${res}"
+	if [ "${res}" -eq 0 ] ; then
+		echo "Error in the provisioning process => defaulting snapshot_0"
+		cp /opt/SolidSense/template/kura/snapshot_0.xml /opt/eclipse/kura/user/snapshots/
+	fi
+fi
+
+# Run the creation of the httpskeystore.ks
+if [ ! -f /opt/eclipse/kura/user/security/httpskeystore.ks ] ; then
+	result="$(keytool -genkey -alias localhost -keyalg RSA -keysize 2048 \
+		-keystore /opt/eclipse/kura/user/security/httpskeystore.ks \
+		-deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" \
+		-ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign \
+		-ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit)"
+	res="$?"
+	if [ "${res}" -ne "0" ] ; then
+		logger --tag "keytool" "Failed with message: <${result}>"
+	fi
 fi
 
 # Update kura_custom.properties
@@ -82,6 +101,12 @@ END {
 }' "${KURA_CUSTOM_PROPERTIES_FILE}" > "${KURA_CUSTOM_PROPERTIES_FILE_TMP}"
 mv "${KURA_CUSTOM_PROPERTIES_FILE_TMP}" "${KURA_CUSTOM_PROPERTIES_FILE}"
 
+# Check if kura_custom.properties is less than 5 bytes
+if [ "$(stat --format=%s "${KURA_CUSTOM_PROPERTIES_FILE}")" -le 5 ] ; then
+	cd "/opt/SolidSense/provisioning" || exit
+	python3 /opt/SolidSense/provisioning/RepairProvisionning.py | logger --tag "repairprovisioning" 2>&1
+fi
+
 DIR=$(cd "$(dirname "${0}")/.." || exit; pwd)
 cd "$DIR" || exit
 
@@ -96,7 +121,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
 		-XX:ErrorFile=/var/log/kura-error.log \
 		-XX:+IgnoreUnrecognizedVMOptions \
-		--add-modules=java.sql,java.xml,java.xml.bind \
+		--add-modules=ALL-SYSTEM \
 		-Dkura.os.version=raspbian \
 		-Dkura.arch=armv7_hf \
 		-Dtarget.device=raspberry-pi-2 \
@@ -104,15 +129,14 @@ if [ -z "$KURA_RUNNING" ] ; then
 		-Dkura.home="${DIR}" \
 		-Dkura.configuration=file:"${DIR}"/framework/kura.properties \
 		-Dkura.custom.configuration=file:"${DIR}"/user/kura_custom.properties \
-		-Dkura.data.dir="${DIR}"/data \
-		-Ddpa.configuration="${DIR}"/data/dpa.properties \
+		-Ddpa.configuration="${DIR}"/packages/dpa.properties \
 		-Dlog4j.configurationFile=file:"${DIR}"/user/log4j.xml \
 		-Djava.security.policy="${DIR}"/framework/jdk.dio.policy \
 		-Djdk.dio.registry="${DIR}"/framework/jdk.dio.properties \
 		-Djdk.tls.trustNameService=true \
 		-Dosgi.console=5002 \
 		-Declipse.consoleLog=true \
-		-jar "${DIR}"/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar \
+		-jar "${DIR}"/plugins/org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar \
 		-configuration /tmp/.kura/configuration) &
 
 	#Save the PID

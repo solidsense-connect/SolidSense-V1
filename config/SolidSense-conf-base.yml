@@ -1,7 +1,7 @@
 #
-#  Base file for SolidSense provisioning V0.95
+#  Base file for SolidSense provisioning V1.2
 #
-#  Copyright Sterwen-Technology/SolidRun 2019
+#  Copyright Sterwen-Technology/SolidRun 2019, 2021
 #
 #   that file provide the basic minimum configuration for Kura and all SolidSense services
 #   It shall be located in /opt/SolidSense/config and named SolidSense-conf-base.yml
@@ -22,7 +22,7 @@ gateway:
     # MODEL-NAME        Description of hardware configuration
     # FIRMWARE          Actual firmware running
     
-    snapshot_0: snapshot_0-full.xml
+    snapshot_0: snapshot_0.xml
     # mode can be normal or test. In test mode all files are generated in /temp directory
     mode: normal 
 #
@@ -71,6 +71,11 @@ services:
         configuration: CommandCloudApp
     properties:
         command.enable: true
+        privileged.command.service.enable: true
+        # command.working.directory:
+        # command.environment:
+        command.timeout: 120
+        # command.password.value
 
 - service:
     # Local loop
@@ -116,7 +121,6 @@ services:
     parameters:
         configuration: NetworkConfigurationService
         prefix: net.interface.$service_name
-        state: active
     variables:
         WPA_KEYMGMT: WPA-PSK
         WIFI_PASSWORD: testKEYS
@@ -128,18 +132,32 @@ services:
         
     properties:
         config.wifi.mode: MASTER
+        config.state: ACTIVATED
         config.ip4.status: netIPv4StatusEnabledLAN
         config.wifi.master.mode: MASTER
         config.dhcpServer4.passDns: true
+        config.nat.enabled: true
         config.wifi.master.securityType: SECURITY_WPA2
         config.wifi.master.ssid: $SERIAL-NUMBER
         config.wifi.master.passphrase: $WIFI_PASSWORD
         config.wifi.master.pairwiseCiphers: $WPA_PAIRWISE
         config.wifi.master.radioMode: RADIO_MODE_80211$WIFI_MODE
         config.ip4.address: 172.16.1.1
+        config.dhcpServer4.enabled: true
         config.dhcpServer4.rangeStart: 172.16.1.100
         config.dhcpServer4.rangeEnd: 172.16.1.115
-
+#
+# Firewall
+#
+- service:
+    type: FirewallService
+    name: firewall
+    state: active
+    parameters:
+        configuration: FirewallConfigurationService
+        allowed_networks: "127.0.0.1/32"
+        #firewall_def: "Firewall definition string (see Kura)"
+        
 #
 #   Modem/GPS service
 #
@@ -186,20 +204,21 @@ services:
         APN_PASSWORD:
         DIAL_STRING: atd*99***#
     properties:
-        config.apn: $APN
-        config.authType: $APN_AUTH
-        config.identifier: $MODEM_MODEL
-        config.username: $APN_USER
-        config.password: $APN_PASSWORD
-        config.dialString: $DIAL_STRING
-        config.ip4.status: netIPv4StatusEnabledWAN
-        config.dhcpClient4.enabled: true
-        config.enabled: true
-        config.autoconnect: true
-        usb.product.name: $MODEM_MODEL
-        usb.vendor.name: $MODEM_MFG
-        model: $MODEM_MODEL
-        manufacturer: $MODEM_MFG
+        config.pppNum: 0
+        #config.apn: $APN
+        #config.authType: $APN_AUTH
+        #config.identifier: $MODEM_MODEL
+        #config.username: $APN_USER
+        #config.password: $APN_PASSWORD
+        #config.dialString: $DIAL_STRING
+        #config.ip4.status: netIPv4StatusDisabled
+        #config.dhcpClient4.enabled: true
+        #config.enabled: true
+        #config.autoconnect: true
+        #usb.product.name: $MODEM_MODEL
+        #usb.vendor.name: $MODEM_MFG
+        #model: $MODEM_MODEL
+        #manufacturer: $MODEM_MFG
         
 
 #
@@ -236,7 +255,7 @@ services:
     state: interactive
     parameters:
         configuration: SolidsenseMqttService
-        plugin: SolidsenseMqttService.dp
+        plugin: SolidsenseMqttService.dp  # To be further investigated why we shall have that only for the MQTT agent
         plugin_name: SolidsenseMqttService
         system: solidsense_mqtt
         prefix: transport
@@ -257,78 +276,8 @@ services:
         persist: true
         maxpacket: 1000
         maxdelay: 1800
-        ble: hci0
+        ble: false
         modemgps: true
         autostart: false
-        obd: true
+        obd: false
         obddongle: OBD
-#
-#  Wirepas with sink1 and sink2 interactive
-#        
-- service:
-    type: WirepasSink
-    name: sink1
-    state: disabled
-    parameters:
-        configuration: WirepasSinkConfigurationService
-        plugin: WirepasConfigurationService.dp
-        plugin_name: WirepasConfigurationService
-        system: wirepasSink1
-        port: ttymxc1       # physical port
-        
-    variables:
-        NETWORK_ID: 10450204
-        NETWORK_CHANNEL: 0
-        ADDRESS: 1
-    properties:
-        sinkAddress: $ADDRESS
-        networkChannel: $NETWORK_CHANNEL
-        networkAddress: $NETWORK_ID
-        sinkName: $service_name
-
-- service:
-    type: WirepasSink
-    name: sink2
-    state: disabled
-    parameters:
-        configuration: WirepasSinkConfigurationService
-        plugin: WirepasConfigurationService.dp
-        plugin_name: WirepasConfigurationService 
-        system: wirepasSink2
-        port: ttymxc2
-        
-    variables:
-        NETWORK_ID: 10450204
-        NETWORK_CHANNEL: 0
-        ADDRESS: 2
-    properties:
-        sinkAddress: $ADDRESS
-        networkChannel: $NETWORK_CHANNEL
-        networkAddress: $NETWORK_ID
-        sinkName: $service_name
-        
-- service:
-    type: WirepasTransport
-    name: wirepas-cloud
-    state: disabled
-    parameters:
-        configuration: WirepasConfigurationService
-        plugin: WirepasConfigurationService.dp
-        plugin_name: WirepasConfigurationService
-        system: wirepasTransport1
-        prefix: transportA
-        # customId:
-    variables:
-        ENABLE: false # to avoid permanent reties on wrong address
-        SECURE: True
-        ADDRESS: YOUR_BROKER_URL
-        PORT: 8883
-        USER: YOUR_BROKER_USER
-        PASSWORD: YOUR_BROKER_PASSWD
-    properties:
-        enabled: $ENABLE
-        secured: $SECURE
-        address: $ADDRESS
-        user: $USER
-        port: $PORT
-        passwd: $PASSWORD

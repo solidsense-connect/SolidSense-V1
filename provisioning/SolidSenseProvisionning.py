@@ -27,6 +27,9 @@ from SnapshotXML import *
 servlog=None
 
 
+class ProvisioningException(Exception):
+    pass
+
 
 class GlobalKuraConfig:
     '''
@@ -44,6 +47,8 @@ class GlobalKuraConfig:
         self._services={}
         self._plugins={}
         self._pppIf=False
+        self._outdoor = False
+        self._industrial = False
         self._networkIf=[]
         self._template_dir=template_dir
         self._config_dir=config_dir
@@ -56,17 +61,34 @@ class GlobalKuraConfig:
         self.read_model_file()
         self.set_internal_variables()
 
-
     def read_source_snapshot(self):
 
         snapshot_name= self.get_variable("snapshot_0","snapshot_0.xml")
         filename=self.template('kura',snapshot_name)
+        if filename is None:
+            filename=self.template('kura', "snapshot_0.xml")
         servlog.info("Reading model snapshot_0:"+filename)
-        if filename != None:
+        if filename is not None:
             self._snapshot=SnapshotFile(filename)
+        else :
+            servlog.critical("Missing model snapshot_0 provisioning halted")
+            raise ProvisioningException()
+        #
+        #  now read the additional snapshot with SolidSense services
+        #
+        snap_ss_name = self.get_variable("snapshot_solidsense", "snapshot_0-solidsense.xml")
+        filename = self.template('kura', snap_ss_name)
+        if filename is None:
+            filename=self.template('kura', "snapshot_0-solidsense.xml")
+        servlog.info("Reading model snapshot_0 solidsense:"+filename)
+        snap_ss = SnapshotFile(filename)
+        self._snapshot.merge_configurations(snap_ss)
+
+    def snapshot(self):
+        return self._snapshot
 
     def rpmb_conf(self):
-        if not os.path.exists("/etc/solidsense_device") :
+        if not os.path.exists("/etc/solidsense_device"):
             self.simul_rpmb()
             return
 
@@ -83,14 +105,18 @@ class GlobalKuraConfig:
         fd.close()
         self._model = (self._partnum.split('.'))[0]
         num_model=int(self._model[3:])
-        if num_model > 100 :
+        if 100 <= num_model < 200:
             servlog.info("Outdoor gateway detected")
             self._outdoor = True
-        else:
-            self._outdoor = False
+        elif 200 <= num_model < 300:
+            servlog.info("Industrial gateway detected")
+            self._industrial = True
 
     def isOutdoor(self):
         return self._outdoor
+
+    def isIndustrial(self):
+        return self._industrial
 
     def mender_conf(self):
         if os.path.exists("/etc/mender/artifact_info"):
@@ -163,7 +189,7 @@ class GlobalKuraConfig:
         self._id=rank
         # now add the week
         self._id += week << 11
-        if year >= 19 and year <= 22 :
+        if 19 <= year <= 22:
             year_code= year - 19
         elif year == 18 :
             year_code=0 # map into 2019 but that is no issue
@@ -174,20 +200,18 @@ class GlobalKuraConfig:
         self._id += year_code << 17
         # print("serial number:",self._sernum,"ID:","0x%06X"%self._id)
 
-
-
     def getSnapshot_conf(self,name):
         return self._snapshot.get_configuration(name)
 
     def set_variable(self,keyword,value):
         self._variables[keyword]=value
 
-    def get_variable(self,key,default=None):
+    def get_variable(self, key, default=None):
         try:
             value=self._variables[key]
         except KeyError :
-            servlog.info("variable not defined:"+key)
-            value=default
+            servlog.info("variable not defined:%s taking default:%s" % (key, str(default)))
+            value = default
         return value
 
     def checkAndReplaceVar(self,value):
@@ -262,6 +286,11 @@ class GlobalKuraConfig:
         filename=os.path.join(outdir,"snapshot_0.xml")
         self._snapshot.write(filename)
 
+    def compute_configuration(self):
+        servlog.info("*******Starting configuration computation*******")
+        for service in self._services.values():
+            service.configuration()
+
     def gen_configuration(self):
         '''
         generate the configuration for all services
@@ -271,12 +300,11 @@ class GlobalKuraConfig:
         kura_custom.properties
         kuranet.conf
         '''
-        servlog.info("*******Starting configuration computation*******")
-        for service in self._services.values() :
-            service.configuration()
 
+        self.compute_configuration()
         servlog.info("*******Starting file generation*******")
         self.gen_netconf()
+        self.gen_dhcpconf()
         self.gen_snapshot0()
         self.gen_properties()
 
@@ -333,20 +361,52 @@ class GlobalKuraConfig:
         fd.write("net.interfaces="+interfaces+'\n')
         fd.close()
 
+    def gen_dhcpconf(self):
+        '''
+        Generate the dhclient.conf file
+        '''
+        fd = open('/etc/dhcp/dhclient.conf', 'w')
+        dhconf = 'send host-name "%s";\n' % self._sernum
+        fd.write(dhconf)
+        fd.close()
+
+
     def gen_plugin(self):
         '''
         Generate the plugin reference file for Kura: dpa.properties
         '''
-        outdir=self.output_dir('/opt/eclipse/kura/data/')
-        output=os.path.join(outdir,'dpa.properties' )
-        plugin_dir='/opt/eclipse/kura/data/packages'
+        # changes for Kura5 packages direct under kura
+        packages_dir = self.get_variable("KURA_PACKAGES", '/opt/eclipse/kura/packages')
+        outdir = self.output_dir(packages_dir)
+        output = os.path.join(outdir, 'dpa.properties')
+        plugin_dir = packages_dir
+        packages_list=[]
+        # now read the list of existing plugins
+        with os.scandir(packages_dir) as it:
+            for entry in it:
+                if entry.name.endswith('.dp'):
+                    print(entry.name)
+                    packages_list.append(entry.name)
+
+        def find_plugin(plugin_name):
+            for p in packages_list:
+                if p.startswith(plugin_name):
+                    return (p)
+            raise KeyError
+
         try:
-            fd=open(output,'w')
+            fd = open(output,'w')
         except IOError as err:
             servlog.error(" Cannot open plugin file:"+output+" "+str(err))
             return
         write_header(fd)
-        for plugin,plugin_file in self._plugins.items() :
+        for plugin, f in self._plugins.items():
+            try:
+                plugin_file = find_plugin(plugin)
+            except KeyError:
+                servlog.error("No plugin for:"+plugin)
+                continue
+
             filename=os.path.join(plugin_dir,plugin_file)
             fd.write(plugin)
             fd.write('=file\\:')
@@ -359,7 +419,7 @@ class GlobalKuraConfig:
         generate the global variables that can depends on other variables
         '''
         prefix_s=self.variableValue('ADDRESS_PREFIX')
-        if prefix_s == None :
+        if prefix_s is None :
             prefix=0
         else:
             try:
@@ -369,12 +429,11 @@ class GlobalKuraConfig:
         if prefix < 0 or prefix > 15 :
             servlog.error("ADDRESS_PREFIX must be in range [0-15]")
             prefix=0
-        addrb= (self._id << 1) + (prefix << 20)
+        addrb = (self._id << 1) + (prefix << 20)
         # print("ADDRESS0: %08X"%addrb)
         self.set_variable('UNIQUE_ADDRESS0',addrb)
         self.set_variable('UNIQUE_ADDRESS1',addrb+1)
         self.set_variable('AUTO_PASSWORD','_%_'+self._sernum[5:]+'#;.&"%')
-
 
     def dump_variables(self):
         servlog.info("****** Declared variables and values *******")
@@ -389,9 +448,8 @@ class GlobalKuraConfig:
 
     def gen_from_template(self,service,category,infile,output_file):
         tf=self.template(category,infile)
-        if tf != None :
+        if tf is not None:
             self.genconfigfile(service,tf,output_file)
-
 
     def genconfigfile(self,service,template,output_file):
         '''
@@ -447,8 +505,6 @@ class GlobalKuraConfig:
             fo.write(line[ke+2:])
             # fo.write('\n')
             # next line
-
-
         ft.close()
         fo.close()
 
@@ -462,7 +518,8 @@ services_class = {
     "KuraService":KuraService,
     "NetworkService": NetworkService,
     "WiFiService": WiFiService,
-    #"EthernetService": EthernetService,
+    # "EthernetService": EthernetService,
+    "FirewallService": FirewallService,
     "ModemGps": ModemGps,
     "PppService": PppService,
     "WirepasSink": WirepasSink,
@@ -470,8 +527,9 @@ services_class = {
     "WirepasMicroService": WirepasMicroService,
     "BluetoothService": BluetoothService,
     "BLEClientService": BLEClientService,
-    "MQTTService":MQTTService
+    "MQTTService": MQTTService
     }
+
 
 def read_service_def(kgc_o,serv_file):
     '''
@@ -486,34 +544,34 @@ def read_service_def(kgc_o,serv_file):
     try:
         res=yaml.load(fd,Loader=yaml.FullLoader)
     except yaml.YAMLError as err:
-         servlog.error("service file:"+serv_file+" syntax error"+str(err))
-         return True
+        servlog.error("service file:"+serv_file+" syntax error"+str(err))
+        return True
 
     #  first the global variables
     global_def= res.get('gateway')
-    if global_def == None :
+    if global_def is None :
         servlog.info('No global variables definition')
     else:
         for name,value in global_def.items() :
             kgc_o.set_variable(name,value)
-        #kgc_o.dump_variables()
+        # kgc_o.dump_variables()
     services_def=res.get('services')
-    if services_def == None :
+    if services_def is None :
         servlog.info('No services definition')
         return True
 
     # print (res)
     for s in services_def:
         service_def=s.get('service')
-        # print ("Instanciating:", service_def.get('type'))
+        print ("Instanciating:", service_def.get('type'))
         try:
             service_class_name=service_def['type']
-        except KeyError :
+        except KeyError:
             servlog.error("missing service type")
             continue
         try:
             service_name=service_def['name']
-        except KeyError :
+        except KeyError:
             servlog.error("missing service name")
             continue
         try:
@@ -521,7 +579,8 @@ def read_service_def(kgc_o,serv_file):
         except KeyError:
             servlog.error("Unknown service:"+service_class_name)
             continue
-        override=True
+
+        override = True
         try:
             override=service_def['override']
         except KeyError :
@@ -529,18 +588,23 @@ def read_service_def(kgc_o,serv_file):
 
         if not override :
             service = kgc_o.get_service(service_name)
-            if service == None :
+            if service is None :
                 override = True
             else:
                 servlog.info("combining Service:"+service_name)
                 service.combine(service_def)
 
-        if override :
-            service=service_class(kgc_o,service_def)
+        if override:
+            try:
+                service = service_class(kgc_o,service_def)
+            except Exception as e:
+                print(e)
+                continue
             servlog.info("adding Service:"+service_class_name+" name:"+service.name())
             kgc_o.add_service(service_name,service)
 
     return False
+
 
 def main():
     # template_dir='C:\\Users\\laure\\Sterwen-Tech\\Git-SolidRun\\SolidSense-V1\\template'
@@ -553,34 +617,37 @@ def main():
         config_dir='/opt/SolidSense/config'
         template_dir='/opt/SolidSense/template'
         custom_dir='/data/solidsense/config'
-        checkCreateDir(custom_dir)
+        try:
+            checkCreateDir(custom_dir)
+        except Exception as e:
+            print(e)
 
     global servlog
     master_file="SolidSense-conf-base.yml"
     master_file_default=True
-    if len(sys.argv) >1 :
+    if len(sys.argv) > 1:
         option=sys.argv[1]
+        print("Running with option:", option)
         if len(sys.argv) > 2 :
             master_file=sys.argv[2]
             master_file_default=False
     else:
         option=None
-    #template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
+    # template_dir='/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/template'
     # config_dir= '/mnt/meaban/Sterwen-Tech-SW/SolidSense-V1/config'
     # looging system
     logfile=os.path.join(custom_dir,'provisioning.log')
     # root_logger = logging.basicConfig(filename=logfile,level=logging.INFO)
-    servlog=logging.getLogger('SolidSense-provisioning')
-    if option == None and not isWindows():
-        loghandler=logging.FileHandler(logfile,mode='w')
+    servlog = logging.getLogger('SolidSense-provisioning')
+    if option is None and not isWindows():
+        loghandler = logging.FileHandler(logfile,mode='w')
     else:
-        loghandler=logging.StreamHandler()
+        loghandler = logging.StreamHandler()
 
-    logformat= logging.Formatter("%(asctime)s | [%(levelname)s] %(message)s")
+    logformat = logging.Formatter("%(asctime)s | [%(levelname)s] %(message)s")
     loghandler.setFormatter(logformat)
     servlog.addHandler(loghandler)
     servlog.setLevel(logging.DEBUG)
-
 
     servlog.info('*******Starting gateway provisioning process***********')
     loghandler.flush()
@@ -594,15 +661,15 @@ def main():
     if read_service_def(kgc,serv_file) :
         servlog.critical("Error in default configuration => STOP")
         loghandler.flush()
-        return
+        raise ProvisioningException
     # now check if we a custom configuration file
     custom_file = 'SolidSense-conf-custom.yml'
     '''
-    Application of the custome file search algorithm (issue 497)
+    Application of the custom file search algorithm (issue 497)
     First search in   /data/solidsense/config
     Then in /opt/SolidSense/config
     '''
-    cust_file=os.path.join(custom_dir,custom_file)
+    cust_file = os.path.join(custom_dir,custom_file)
     # check existence
     if not os.path.lexists(cust_file) :
         # there is no file is the /data partition
@@ -612,24 +679,32 @@ def main():
             servlog.debug("Custom configuration not existing:"+cust_file)
             cust_file=None
 
-    if cust_file != None :
+    if cust_file is not None :
         servlog.info("Reading custom configuration file:"+cust_file)
-        if read_service_def(kgc,cust_file) :
+        if read_service_def(kgc,cust_file):
             servlog.info("Error in custom configuration file")
     else:
         servlog.info("No custom configuration file => proceeding with default")
     # generate secondary global variables
+    print("End yml analysis")
     kgc.gen_secondary_global()
     # trace the variables
     kgc.dump_variables()
-    if option != None :
-        if option == "--syntax" :
+    if option is not None:
+        if option == "--syntax":
             servlog.info("******** Syntax check mode ** No configuration generated")
             loghandler.flush()
             return
 
     kgc.read_source_snapshot()
     # dump the properties found
+    if option is not None:
+        if option == "--test":
+            servlog.info("*****test mode")
+            kgc.compute_configuration()
+            loghandler.flush()
+            return
+
     kgc.dump_properties('initial')
     # check one or 2 for test
     # nserv=kgc.getSnapshot_conf('NetworkConfigurationService')
@@ -641,5 +716,10 @@ def main():
         kgc.start_services()
     loghandler.flush()
 
+
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        exit(0)
+    exit(1)
