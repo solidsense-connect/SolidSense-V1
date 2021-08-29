@@ -735,7 +735,7 @@ class FirewallService(KuraService):
         # if on industrial add eth1
         if self._kura_config.isIndustrial():
             dns_port = FirewallOpenPort(53,protocol='udp',interface='eth1')
-            dhcp_port = FirewallOpenPort(63,protocol='udp',interface='eth1')
+            dhcp_port = FirewallOpenPort(67,protocol='udp',interface='eth1')
             https_port = FirewallOpenPort(443,protocol='tcp',interface='eth1')
             https2_port = FirewallOpenPort(4443, protocol='tcp', interface='eth1')
             self._open_ports.append(dns_port)

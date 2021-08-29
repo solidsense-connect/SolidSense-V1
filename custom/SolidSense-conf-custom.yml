@@ -44,7 +44,7 @@ gateway:
     MQTT_BROKER: vps.sterwen-technology.eu
     MQTT_PORT: 1883
     MQTT_USER: solidsense
-    MQTT_PASSWORD: aiPh2eim
+    MQTT_PASSWORD: TO_BE_CONFIGURED
     
 #######################################################
 #                Services definition
@@ -64,8 +64,8 @@ services:
     override: false
  
     properties:
-        topic.context.account-name: SOLIDRUN-TEST
-        username: solidrun-internal
+        topic.context.account-name: SOLIDRUN-NURSERY
+        username: newborn_gw
         password: ^$SolidSense2019$
         client-id: $SERIAL-NUMBER
         
