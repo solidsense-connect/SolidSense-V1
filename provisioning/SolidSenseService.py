@@ -99,6 +99,9 @@ class SolidSenseService:
     def addProperty(self,name,value):
         self._properties[name]=value
 
+    def setVariable(self,name,value):
+        self._variables[name] = value
+
     def asVariable(self,name):
         if name in self._variables.keys():
             return True
@@ -336,7 +339,7 @@ class WirepasTransport(KuraService):
 
     # Transport_Keywords=("ADDRESS","PORT","USER","PASSWORD")
     Transport_Cmd={"ADDRESS":"host","PORT":"port","USER":"mqtt_username","PASSWORD":"mqtt_password",
-                   "MAX_DElAY": "buffering_max_delay_without_publish", "MAX_PACKET": "buffering_max_buffered_packets"}
+                   "MAX_DELAY": "buffering_max_delay_without_publish", "MAX_PACKET": "buffering_max_buffered_packets"}
 
     def __init__(self,kura_config,def_dict):
         super().__init__(kura_config,def_dict)
@@ -373,8 +376,10 @@ class WirepasTransport(KuraService):
             self._gwid=self.variableValue('SERIAL-NUMBER')
 
         if not self.asVariable('MAX_DELAY'):
+            self.setVariable('MAX_DELAY', 0)
             self._snapconf.set_property('maxdelay', 0)
         if not self.asVariable('MAX_PACKET'):
+            self.setVariable('MAX_PACKET', 0)
             self._snapconf.set_property('maxpacket',0)
 
         # print('gateway ID=',self._gwid)
@@ -411,6 +416,13 @@ class WirepasTransport(KuraService):
             fd.write("status_led: 1\n")
         fd.write("status_file: /data/solidsense/wirepas/wirepasTransport1.service.status\n")
         fd.close()
+
+    def startService(self):
+        force = self.parameterValue('start_service')
+        if force is not None:
+            if force:
+                systemCtl('enable', self._service)
+                systemCtl('start', self._service)
 
 
 class WirepasMicroService(KuraService):

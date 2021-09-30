@@ -22,31 +22,33 @@ class Led():
         self._colors={}
         self._index=index
     
-    def add_color(self,color):
-        if color == 'red' :
+    def add_color(self, color):
+        if color == 'red':
             self._colors['red']=True
-        elif color == 'green' :
+        elif color == 'green':
             self._colors['green']=True
+        elif color == 'led':
+            self._colors['led'] = True
         else:
             raise ValueError ("Unknown color")
         
     def impl(self):
-        def fullname(self,color):
+        def fullname(color):
             exists=self._colors[color]
             file= "%s/%s%1d/brightness"%(SolidSenseLed.led_path,color,self._index)
             # print(file)
             return file
         
         if len(self._colors) > 1:
-            led=BicolorLed(fullname(self,'red'),fullname(self,'green'))
+            led=BicolorLed(fullname('red'),fullname('green'))
         else:
-            led=MonochromeLed(fullname(self,'green'))
+            led=MonochromeLed(fullname(list(self._colors)[0]))
         return led
         
 
 class SolidSenseLed:
 
-    led_path="/sys/devices/soc0/leds/leds"
+    led_path="/sys/class/leds"
     leds=[None,None,None,None,None]
     init=False
 
@@ -54,13 +56,15 @@ class SolidSenseLed:
     def detectLeds():
         for entry in os.scandir(SolidSenseLed.led_path):
             # print (entry.name)
+            if entry.name.startswith('mmc'):
+                continue
             lent=len(entry.name)
             led_num=int(entry.name[lent-1:lent])
             color=entry.name[:lent-1]
             led=SolidSenseLed.leds[led_num]
-            if led is not None :
+            if led is not None:
                 led.add_color(color)
-            else :
+            else:
                 led=Led(led_num)
                 led.add_color(color)
                 SolidSenseLed.leds[led_num]=led
@@ -91,16 +95,15 @@ class SolidSenseLed:
         else:
             raise ValueError('No led '+str(led_num))
 
-    
 
-class AbstractLed():
+class AbstractLed:
     
     def __init__(self):
        self._timer=None
        self._lock=threading.Lock()
        
     def off(self):
-        if self._timer != None :
+        if self._timer is not None :
             self._timer.cancel()
             self._timer=None 
     
