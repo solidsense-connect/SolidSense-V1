@@ -308,6 +308,55 @@ determine_offset () {
 	echo "${FLASH_OFFSET}"
 }
 
+determine_reset_gpio () {
+	hardware=$(determine_hardware)
+
+	case "${hardware}" in
+		imx8mnc )
+			GPIO_RESET="5"
+			;;
+		* )
+			echo "Device type <${hardware}> not found!"
+			GPIO_RESET="UNKNOWN"
+			;;
+	esac
+	echo "${GPIO_RESET}"
+}
+
+gpio_set_value () {
+	value="${1}"
+	gpio_reset=$(determine_reset_gpio)
+	export="/sys/class/gpio/export"
+	unexport="/sys/class/gpio/unexport"
+	file_gpio="/sys/class/gpio/gpio${gpio_reset}"
+
+	if [ ! -e "${file_gpio}" ] ; then
+		echo "${gpio_reset}" > ${export}
+	fi
+
+	if [ "${value}" -eq 1 ] ; then
+		echo "out" > "${file_gpio}/direction"
+		echo "${value}" > "${file_gpio}/value"
+	else
+		echo "${gpio_reset}" > "${unexport}"
+	fi
+}
+
+gpio_handle () {
+	state=${1}
+	case "${state}" in
+		enable )
+			gpio_set_value 1
+			;;
+		disable )
+			gpio_set_value 0
+			;;
+		* )
+			echo "Unknown GPIO state: ${state}"
+			;;
+	esac
+}
+
 cleanup () {
 	if [ -f "${OCD_CFG_FILE}" ]; then
 		rm -f "${OCD_CFG_FILE}"
@@ -396,6 +445,7 @@ fi
 
 # Have a valid sink
 touch "${LOGFILE}"
+gpio_handle "enable"
 openocd_create_cfg_file
 openocd_check_busy_state
 openocd_check_state
@@ -418,6 +468,7 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 	if [ "${#}" -ne "1" ]; then
 		openocd_reset_run
 		openocd_shutdown
+		gpio_handle "disable"
 		cleanup
 		usage
 	else
@@ -437,6 +488,7 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 					echo "Unknown type <${TYPE}> not found!"
 					openocd_reset_run
 					openocd_shutdown
+					gpio_handle "disable"
 					cleanup
 					exit 1
 					;;
@@ -446,6 +498,7 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 			echo "The <${FILENAME}> does not exist!"
 			openocd_reset_run
 			openocd_shutdown
+			gpio_handle "disable"
 			cleanup
 			exit 1
 		fi
@@ -455,4 +508,5 @@ fi
 # Finished, cleaning up
 openocd_reset_run
 openocd_shutdown
+gpio_handle "disable"
 cleanup
