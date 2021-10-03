@@ -12,7 +12,14 @@ SRG0007: SolidSense N6 Edge Gateway Indoor - Quad Core-WiFi-LTE C4 US - Industri
 SRG0102: SolidSense N6 Edge Gateway Outdoor - Dual Core-WiFi-LTE C4 EU - Industrial
 SRG0107: SolidSense N6 EDGE Gateway Outdoor - Dual Core-WiFi-LTE C4 AU - Industrial
 SRG0200: SolidSense N6 Industrial Edge Gateway - Dual Core - PCB version
-SRG0201: SolidSense N6 Industrial Edge Gateway - Dual Core
-SRG0202: SolidSense N6 Industrial Edge Gateway - Dual Core - LTE
-SRG0211: SolidSense N6 Industrial Edge Router - Dual Core
-SRG0212: SolidSense N6 Industrial Edge Router - Dual Core - LTE
+SRG0201: SolidSense N6 Industrial Edge Gateway - Dual Core - No LTE
+SRG0202: SolidSense N6 Industrial Edge Gateway - Dual Core - LTE EU
+SRG0202: SolidSense N6 Industrial Edge Gateway - Dual Core - LTE Global
+SRG0203: SolidSense N6 Industrial Edge Gateway - Dual Core - LTE AU
+SRG0231: SolidSense N6 Industrial Ethernet Gateway - Dual Core
+SRG0232: SolidSense N6 Industrial Ethernet Gateway - Dual Core - LTE Global
+SRG0400: SolidSense N8 Compact - Test version fully equipped
+SRG0401: SolidSense N8 Compact BLE
+SRG0402: SolidSense N8 Compact LTE BLE
+SRG0403: SolidSense N8 Compact Extended
+SRG0404: SolidSense N8 Compact LTE Extended
