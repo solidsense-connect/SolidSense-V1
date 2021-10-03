@@ -253,7 +253,7 @@ class WirepasSink(KuraService):
 
     Sink_Keywords=("ADDRESS","NETWORK_ID","NETWORK_CHANNEL","CIPHER_KEY","AUTH_KEY")
     Sink_Cmd={"NAME":'-s',"ADDRESS":"-n","NETWORK_ID":"-N","NETWORK_CHANNEL":"-c","START":"-S",
-              "CIPHER_KEY": "-ck", "AUTH_KEY": "-ck"}
+              "CIPHER_KEY": "-ck", "AUTH_KEY": "-ak"}
 
     def __init__(self,kura_config, def_dict):
         super().__init__(kura_config, def_dict)
@@ -312,9 +312,10 @@ class WirepasSink(KuraService):
         fd.write("-r=sink csma-ca\n")
         for k in WirepasSink.Sink_Keywords:
             if self.asVariable(k):
-                cmd = WirepasSink.Sink_Cmd[k]+'='+str(self.variableValue(k))
-                fd.write(cmd + '\n')
-                servlog.debug(cmd)
+                if self.variableValue(k) is not None:
+                    cmd = WirepasSink.Sink_Cmd[k]+'='+str(self.variableValue(k))
+                    fd.write(cmd + '\n')
+                    servlog.debug(cmd)
         cmd = WirepasSink.Sink_Cmd['START']+'='+bool2str(self._parameters.get('start', False))
         fd.write(cmd + '\n')
         servlog.debug(cmd)
