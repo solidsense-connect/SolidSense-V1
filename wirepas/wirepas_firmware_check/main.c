@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 		// get firmware version
 		e = WPC_get_firmware_version(version);
 		if(e != APP_RES_OK) {
-			fprintf(stderr, "Error: WPC_get_firmware_version(0x%x) returned %s.\n", version, handle_ret(e));
+			fprintf(stderr, "Error: WPC_get_firmware_version(0x%hn) returned %s.\n", version, handle_ret(e));
 			// shut down (kills this thread!)
 			WPC_close();
 			return e;

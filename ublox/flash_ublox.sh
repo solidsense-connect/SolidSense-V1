@@ -17,6 +17,22 @@ DEVICE="b1"
 
 # Functions
 openocd_create_cfg_file () {
+	hardware=$(determine_hardware)
+	if [ "${hardware}" = "imx8mnc" ] ; then
+	cat > "${OCD_CFG_FILE}" << END
+source [find interface/imx-native.cfg]
+
+transport select swd
+
+set WORKAREASIZE 0
+
+imx_gpio_peripheral_base 0x30200000
+imx_gpio_speed_coeffs 50000 50
+source [find target/nrf52.cfg]
+
+imx_gpio_swd_nums ${OCD_SWD_NUMS}
+END
+	else
 	cat > "${OCD_CFG_FILE}" << END
 source [find interface/imx-native.cfg]
 
@@ -28,6 +44,7 @@ source [find target/nrf52.cfg]
 
 imx_gpio_swd_nums ${OCD_SWD_NUMS}
 END
+	fi
 }
 
 replaceByte () {
@@ -54,7 +71,7 @@ openocd_cmd () {
 openocd_check_busy_state () {
 	echo "Checking chip state"
 	OCD_PID=$(openocd -f "${OCD_CFG_FILE}" -c init >> "${LOGFILE}" 2>&1 & echo ${!})
-	sleep 1
+	sleep 2
 	grep -q "telnet" "${LOGFILE}"
 	result="${?}"
 	if [ "${result}" != "0" ]; then
@@ -206,6 +223,9 @@ determine_hardware () {
 		"SolidRun SolidSense IN6 Dual/Quad (1.5som+emmc)" )
 			hardware="in6gq"
 			;;
+		"NXP i.MX8MNano DDR4 SolidRun board" )
+			hardware="imx8mnc"
+			;;
 		* )
 			hardware="UNKNOWN"
 			;;
@@ -237,6 +257,16 @@ determine_swds () {
 					;;
 				2|sink2 )
 					SWD="91 90"
+					;;
+				* )
+					SWD="UNKNOWN"
+					;;
+			esac
+			;;
+		imx8mnc )
+			case "${1}" in
+				1|sink1 )
+					SWD="14 15"
 					;;
 				* )
 					SWD="UNKNOWN"
@@ -276,6 +306,55 @@ determine_offset () {
 			;;
 	esac
 	echo "${FLASH_OFFSET}"
+}
+
+determine_reset_gpio () {
+	hardware=$(determine_hardware)
+
+	case "${hardware}" in
+		imx8mnc )
+			GPIO_RESET="5"
+			;;
+		* )
+			echo "Device type <${hardware}> not found!"
+			GPIO_RESET="UNKNOWN"
+			;;
+	esac
+	echo "${GPIO_RESET}"
+}
+
+gpio_set_value () {
+	value="${1}"
+	gpio_reset=$(determine_reset_gpio)
+	export="/sys/class/gpio/export"
+	unexport="/sys/class/gpio/unexport"
+	file_gpio="/sys/class/gpio/gpio${gpio_reset}"
+
+	if [ ! -e "${file_gpio}" ] ; then
+		echo "${gpio_reset}" > ${export}
+	fi
+
+	if [ "${value}" -eq 1 ] ; then
+		echo "out" > "${file_gpio}/direction"
+		echo "${value}" > "${file_gpio}/value"
+	else
+		echo "${gpio_reset}" > "${unexport}"
+	fi
+}
+
+gpio_handle () {
+	state=${1}
+	case "${state}" in
+		enable )
+			gpio_set_value 1
+			;;
+		disable )
+			gpio_set_value 0
+			;;
+		* )
+			echo "Unknown GPIO state: ${state}"
+			;;
+	esac
 }
 
 cleanup () {
@@ -366,6 +445,7 @@ fi
 
 # Have a valid sink
 touch "${LOGFILE}"
+gpio_handle "enable"
 openocd_create_cfg_file
 openocd_check_busy_state
 openocd_check_state
@@ -388,6 +468,7 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 	if [ "${#}" -ne "1" ]; then
 		openocd_reset_run
 		openocd_shutdown
+		gpio_handle "disable"
 		cleanup
 		usage
 	else
@@ -401,12 +482,13 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 					FLASH_OFFSET="$(determine_offset "${DEVICE}")"
 					;;
 				wirepas )
-					FLASH_OFFSET=""
+					FLASH_OFFSET="0x0"
 					;;
 				* )
 					echo "Unknown type <${TYPE}> not found!"
 					openocd_reset_run
 					openocd_shutdown
+					gpio_handle "disable"
 					cleanup
 					exit 1
 					;;
@@ -416,6 +498,7 @@ if [ "${STATUS_TYPE}" = "1" ]; then
 			echo "The <${FILENAME}> does not exist!"
 			openocd_reset_run
 			openocd_shutdown
+			gpio_handle "disable"
 			cleanup
 			exit 1
 		fi
@@ -425,4 +508,5 @@ fi
 # Finished, cleaning up
 openocd_reset_run
 openocd_shutdown
+gpio_handle "disable"
 cleanup
