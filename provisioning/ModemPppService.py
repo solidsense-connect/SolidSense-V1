@@ -21,6 +21,7 @@ else:
 import json
 import logging
 import stat
+import time
 
 from SolidSenseService import *
 try:
@@ -38,29 +39,31 @@ class PppService(NetworkService):
 
     def __init__(self,kura_config,def_dict):
         super().__init__(kura_config,def_dict)
+        self._valid = False
+        # self._state = state_DISABLED
 
     def configuration(self):
-        modem=self._kura_config.get_service('modem_gps')
+        loclog.info("Ppp configuration starts with state %s" % self._state)
+        modem = self._kura_config.get_service('modem_gps')
+
         if modem is None:
-            self._state=state_DISABLED
+            self._state = state_DISABLED
             loclog.error("Ppp Service => No supporting modem service")
-            self._valid = False
-        else:
-            self._valid = modem.valid()
+
+        if self._state != state_DISABLED:
+            # if we need a modem let's retry until the modem is ready
+            self._valid = modem.waitvalid(10.0)
             if not self._valid :
                 loclog.error('Ppp Service => No valid modem')
-                self._state=state_DISABLED
+                self._state = state_DISABLED
 
-        if self._state == state_DISABLED :
-            self.addProperty('config.ip4.status','netIPv4StatusDisabled')
-        
-        loclog.info("Starting ppp service configuration for:"+self._name)
-        
+        if self._state == state_DISABLED:
+            self.addProperty('config.ip4.status', 'netIPv4StatusDisabled')
+            return
         super().configuration()
-        if self._state == state_DISABLED :
-            return 
-        
-        kura_id=self._kura_config.get_variable('MODEM_KURAID')
+        loclog.info("Starting ppp service configuration for:"+self._name)
+
+        kura_id = self._kura_config.get_variable('MODEM_KURAID')
         # check that we have an APN
         apn=self.variableValue("APN")
         if apn is None or len(apn) < 2 :
@@ -155,76 +158,90 @@ class ModemGps(SolidSenseService):
 
     def __init__(self,kura_config,def_dict):
         super().__init__(kura_config,def_dict)
+        self._kura_config = kura_config
         if isWindows():
             kura_config.set_variable('MODEM_MODEL',"EC25")
             self._state='active'
             self._valid=True
             kura_config.set_variable('MODEM_KURAID',"EC25_2-1.2")
         else:
+            self.init_modem()
 
-            mdm_usb=QuectelModem.checkModemPresence()
-            if mdm_usb is None :
-                self._valid=False
-                return
-            loclog.info('Modem service => modem found:'+str(mdm_usb))
-            
-            tty1=self.parameterValue('modem_ctrl')
-            if not os.path.exists(tty1) :
-                loclog.error('Modem service => TTY control file not existing:'+tty1)
-                self._valid=False
-                return
-            mode=os.stat(tty1).st_mode
-            if stat.S_ISCHR(mode) == 0 :
-                loclog.error('Modem service => Invalid TTY control file:'+tty1)
-                self._valid=False
-                return
+    def init_modem(self):
+        loclog.info("Modem service => Checking modem presence")
+        mdm_usb = QuectelModem.checkModemPresence(loclog)
+        if mdm_usb is None :
+            self._valid=False
+            return
+        loclog.info('Modem service => modem found:'+str(mdm_usb))
+
+        tty1=self.parameterValue('modem_ctrl')
+        if not os.path.exists(tty1) :
+            loclog.error('Modem service => TTY control file not existing:'+tty1)
+            self._valid=False
+            return
+        mode=os.stat(tty1).st_mode
+        if stat.S_ISCHR(mode) == 0 :
+            loclog.error('Modem service => Invalid TTY control file:'+tty1)
+            self._valid=False
+            return
             # Now some basic checks on the modem
-            try:
-                modem = QuectelModem(tty1)
-            except ModemException as err:
-                loclog.error('Modem Service => Error during modem access:'+str(err))
-                self._valid=False
-                return
-            except ImportError :
-                loclog.error('Modem Service => Missing Quectel AT module')
-                self._valid=False
-                return
-            #
-            #  now get the parameters
-            #
-            # special case for Quectel EC25 => EX25 in Kura
-            mdm_model = modem.model()
-            if mdm_model == "EC25":
-                mdm_model = "EX25"
-            modem_kura_id = mdm_model +"_"+mdm_usb['dev_path']
+        try:
+            modem = QuectelModem(tty1)
+        except ModemException as err:
+            loclog.error('Modem Service => Error during modem access:'+str(err))
+            self._valid=False
+            return
+        except ImportError :
+            loclog.error('Modem Service => Missing Quectel AT module')
+            self._valid=False
+            return
+        #
+        #  now get the parameters
+        #
+        # special case for Quectel EC25 => EX25 in Kura
+        mdm_model = modem.model()
+        if mdm_model == "EC25":
+            mdm_model = "EX25"
+        modem_kura_id = mdm_model +"_"+mdm_usb['dev_path']
 
-            kura_config.set_variable('MODEM_MFG',modem.manufacturer())
-            kura_config.set_variable('MODEM_MODEL',modem.model())
-            kura_config.set_variable('MODEM_IMEI',modem.IMEI())
-            kura_config.set_variable('MODEM_SIM_IN',modem.SIM_Present())
-            kura_config.set_variable('MODEM_KURAID',modem_kura_id)
-            self._valid= True
-            if self._state == state_AUTO :
-                self._state = state_ACTIVE
-
-
-
+        self._kura_config.set_variable('MODEM_MFG',modem.manufacturer())
+        self._kura_config.set_variable('MODEM_MODEL',modem.model())
+        self._kura_config.set_variable('MODEM_IMEI',modem.IMEI())
+        self._kura_config.set_variable('MODEM_SIM_IN',modem.SIM_Present())
+        self._kura_config.set_variable('MODEM_KURAID',modem_kura_id)
+        self._valid = True
+        if self._state == state_AUTO:
+            self._state = state_ACTIVE
 
     def valid(self):
         return self._valid
 
+    def waitvalid(self, timeout):
+        loclog.info("Modem service => re-check modem (already detected %s)" % str(self._valid))
+        if self._valid:
+            return True
+        start_time = time.time()
+        while True:
+            self.init_modem()
+            if self._valid:
+                logging.debug("Modem service => found modem after re-check")
+                return True
+            if time.time() - start_time > timeout:
+                return False
+            time.sleep(0.5)
 
     def configuration(self):
         if self._state == state_ACTIVE and self._valid :
             self._parameters['start_gps_service']= True
         else:
             self._parameters['start_gps_service']= False
-        self._system_serv=self._parameters.get('system')
+        self._system_serv = self._parameters.get('system')
         try:
             del self._parameters['system']
         except KeyError :
             pass
-        outdir=self._kura_config.output_dir('/data/solidsense/modem_gps')
+        outdir = self._kura_config.output_dir('/data/solidsense/modem_gps')
         param=os.path.join(outdir,'parameters.json')
         checkCreateDir(outdir)
         try:
