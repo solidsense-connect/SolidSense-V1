@@ -1,0 +1,9 @@
+[Unit]
+Description=Start btattach for murate BLE on ttymcx0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/hciattach -n /dev/ttymxc0 bcm43xx 3000000 flow -t 20
+
+[Install]
+WantedBy=multi-user.target
