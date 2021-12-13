@@ -31,6 +31,7 @@ imx_gpio_speed_coeffs 50000 50
 source [find target/nrf52.cfg]
 
 imx_gpio_swd_nums ${OCD_SWD_NUMS}
+adapter speed 100
 END
 	else
 	cat > "${OCD_CFG_FILE}" << END
@@ -316,7 +317,6 @@ determine_reset_gpio () {
 			GPIO_RESET="5"
 			;;
 		* )
-			echo "Device type <${hardware}> not found!"
 			GPIO_RESET="UNKNOWN"
 			;;
 	esac
@@ -343,6 +343,10 @@ gpio_set_value () {
 }
 
 gpio_handle () {
+	gpio_reset=$(determine_reset_gpio)
+	if [ "${gpio_reset}" = "UNKNOWN" ] ; then
+		return
+	fi
 	state=${1}
 	case "${state}" in
 		enable )
