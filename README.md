@@ -84,7 +84,7 @@ This is an ASCII string, with a general syntax <KEYWORD>=<VALUE> separated by co
 1. PART: Full partnumber including product code and revison (ex: SRG0002.01)
 2. SERIAL: Serial number of the product (ex: BS18170012)
 3. PRODUCT: Product code == hardware configuration (ex: SRG0002)
-4. NORDIC1_TYPE: Type of the sink1 (NINAB1/NINAB3)
+4. NORDIC1_TYPE: Type of the sink1 (NINAB1/NINAB3/NINAB4/FWM7BLZ22W)
 5. NORDIC2_TYPE: Type of the sink2
 If a specific firmware is flashed in the sink(s) then the 2 follwing fields are added
 6. STACK1_TYPE: type of firmware flashed
@@ -95,8 +95,10 @@ If a specific firmware is flashed in the sink(s) then the 2 follwing fields are 
 	
 8. SW1_VERSION: STACK1 SW/FW Version (string)
 9. SW2_VERSION: STACK2 SW/FW Version (string)
-10. PCB: PCB Version (Useful for Solidsense N8) 
-11. SKU: PCB full SKU (Useful for Solidsense N8)
+10. NORDIC1_MAC: STACK1 MAC Address
+11. NORDIC2_MAC: STACK2 MAC Address
+12. PCB: PCB Version (Useful for Solidsense N8) 
+13. SKU: PCB full SKU (Useful for Solidsense N8)
 
 ## Example
 
