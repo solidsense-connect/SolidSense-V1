@@ -17,7 +17,7 @@
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
 	<esf:properties>
 	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
-                <esf:value>22,tcp,,,,,,#;443,tcp,,eth0,,,,#;443,tcp,,wlan0,,,,#;443,tcp,10.234.0.0/16,,,,,#;4443,tcp,,eth0,,,,#;4443,tcp,,wlan0,,,,#;4443,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,wlan0,,,,#</esf:value>
+                <esf:value>22,tcp,,,,,,#;443,tcp,,eth0,,,,#;443,tcp,,wlan0,,,,#;443,tcp,10.234.0.0/16,,,,,#;4443,tcp,,eth0,,,,#;4443,tcp,,wlan0,,,,#;4443,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,wlan0,,,,#;443,tcp,,tun0,,,,#</esf:value>
             </esf:property>
 	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
                 <esf:value></esf:value>
@@ -68,6 +68,9 @@
             <esf:property name="net.interface.eth0.type" array="false" encrypted="false" type="String">
                 <esf:value>ETHERNET</esf:value>
             </esf:property>
+            <esf:property name="net.interface.tun0.type" array="false" encrypted="false" type="String">
+                <esf:value>TUNNELING</esf:value>
+            </esf:property>
             <esf:property name="net.interface.lo.type" array="false" encrypted="false" type="String">
                 <esf:value>LOOPBACK</esf:value>
             </esf:property>
@@ -106,6 +109,9 @@
             </esf:property>
             <esf:property name="net.interface.eth0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.tun0.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.loopback" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
@@ -171,7 +177,7 @@
                 <esf:value>0424</esf:value>
             </esf:property>
             <esf:property name="net.interfaces" array="false" encrypted="false" type="String">
-                <esf:value>lo,wlan0,eth0</esf:value>
+                <esf:value>lo,wlan0,tun0,eth0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.securityType" array="false" encrypted="false" type="String">
                 <esf:value>NONE</esf:value>
@@ -564,7 +570,7 @@
                 <esf:value>birth-connect-reconnect</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="device.custom-name" type="String">
-                <esf:value>Raspberry Pi 2</esf:value>
+                <esf:value>fill device custom name </esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="device.display-name" type="String">
                 <esf:value>device-name</esf:value>
