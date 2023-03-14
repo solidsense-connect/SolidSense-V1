@@ -1,4 +1,8 @@
 #!/bin/sh
+# SolidSense-Connect
+#
+# Flash nordic nrf52832 u-blox | nrf52833 FWM7BLZ22W | nrf52840 ublox
+
 
 # Globals
 NC="$(command -vp nc)"
@@ -294,6 +298,9 @@ determine_offset () {
 		b1|B1 )
 			FLASH_OFFSET="0x8000"
 			;;
+                fmw|FMW )
+                        FLASH_OFFSET="0x8000"
+                        ;;
 		b3|B3 )
 			FLASH_OFFSET="0xc000"
 			;;
@@ -380,9 +387,9 @@ cleanup () {
 usage () {
 	echo "$(basename "${0}"): firmware                   : Firmware image to flash"
 	echo "    -s|--sink                                  : Sink <1|2>"
-	echo "    -d|--device                                : Nina <b1|B1> or Nina <b3|B3>"
+	echo "    -d|--device                                : Nina <b1|B1> or Fmw <fmw|FMW> or Nina <b3|B3>"
 	echo "    -m|--mac-check                             :"
-	echo "    -M|--mac-set <MAC Address>                 : example: 0a:01:02:03:04:05"
+	echo "    -M|--mac-set <MAC Address>                 : example: 0a:01:02:03:04:05 or ETH MAC + 1 (Recommended)"
 	echo "    -t|--type                                  : type to flash <boot|program|wirepas>"
 	echo "    <FILE>                                     : file to flash"
 	echo ""

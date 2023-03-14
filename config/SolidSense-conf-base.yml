@@ -100,6 +100,7 @@ services:
 #  Default network configuration
 #   WAN => eth0  & DHCP client
 #   LAN => tun0  & no DHCP
+#   LAN => tap0  & no DHCP
 #   LAN => wlan0 & DHCP Server
 #   LAN => ppp0  & DHCP client
 
@@ -132,6 +133,22 @@ services:
         config.dhcpClient4.enabled: false
         config.dhcpServer4.enabled: false
         config.autoconnect: true
+
+# Tunneling tap0
+- service:
+    type: NetworkService
+    name: tap0
+    state: active
+    parameters:
+        configuration: NetworkConfigurationService
+        prefix: net.interface.$service_name
+    variables:
+    properties:
+        config.ip4.status: netIPv4StatusEnabledLAN
+        config.dhcpClient4.enabled: false
+        config.dhcpServer4.enabled: false
+        config.autoconnect: true
+
 #
 #   WiFi configuration by default
 #   Access point
@@ -181,7 +198,7 @@ services:
         allowed_networks: "127.0.0.1/32"
         #firewall_def: "Firewall definition string (see Kura)"
     properties:
-        firewall.open.ports: 22,tcp,,,,,,#;53,udp,,eth0,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,wlan0,,,,#;443,tcp,,eth0,,,,#;443,tcp,,wlan0,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,wlan0,,,,#;4443,tcp,,eth0,,,,#;4443,tcp,,wlan0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,wlan0,,,,#;53,udp,,ppp0,,,,#;67,udp,,ppp0,,,,#;443,tcp,,ppp0,,,,#;1450,tcp,,ppp0,,,,#;4443,tcp,,ppp0,,,,#;8000,tcp,,ppp0,,,,#;443,tcp,,tun0,,,,#
+        firewall.open.ports: 22,tcp,,,,,,#;53,udp,,eth0,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,wlan0,,,,#;443,tcp,,eth0,,,,#;443,tcp,,wlan0,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,wlan0,,,,#;4443,tcp,,eth0,,,,#;4443,tcp,,wlan0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,wlan0,,,,#;53,udp,,ppp0,,,,#;67,udp,,ppp0,,,,#;443,tcp,,ppp0,,,,#;1450,tcp,,ppp0,,,,#;4443,tcp,,ppp0,,,,#;8000,tcp,,ppp0,,,,#;443,tcp,,tap0,,,,#;443,tcp,,tun0,,,,#
 #
 #   Modem/GPS service
 #

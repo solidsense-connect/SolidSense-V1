@@ -1,5 +1,5 @@
 [Unit]
-Description=Start btattach for UBlox on ttymxc1
+Description=Start btattach for Nordic on ttymxc1
 
 [Service]
 Type=simple
