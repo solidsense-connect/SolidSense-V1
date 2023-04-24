@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="com.solidsense.kura.OpenVPNConfigurationService"
+        name="OpenVPN Service Configuration"
+        description="Configuration of the OpenVPN service">
+        
+        <Icon resource="OSGI-INF/icon.png" size="16"/>
+
+        <AD id="status"
+            name="OpenVPN client status"
+            type="String"
+            cardinality="0"
+            required="false" />
+        
+        <AD id="openvpn.enabled"  
+            name="OpenVPN enabled"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enable/Disable OpenVPN service."/>
+
+        <AD id="bundle"  
+            name="Certificates"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="false" 
+            description="All certificates of the bundle."/>
+
+        <AD id="private_key"  
+            name="Private key of the device"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="false" />
+
+        <AD id="config"
+            name="OpenVPN client configuration"
+            type="String"
+            required="false"
+            cardinality="0" />
+    </OCD>
+
+    <Designate pid="com.solidsense.kura.OpenVPNConfigurationService">
+        <Object ocdref="com.solidsense.kura.OpenVPNConfigurationService"/>
+    </Designate>
+</MetaData>

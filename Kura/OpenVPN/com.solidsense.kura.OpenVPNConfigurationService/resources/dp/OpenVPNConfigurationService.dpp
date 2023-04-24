@@ -1,0 +1,19 @@
+#Deployment Plugin Project File
+#Mon Apr 24 16:55:00 CEST 2023
+build.ant.name=<.>/resources/dp/OpenVPNConfigurationService_build.xml
+build.dp.file=<.>/resources/dp/OpenVPNConfigurationService.dp
+build.location=
+bundles.0.bundle_path=
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/com.solidsense.kura.sink-1.1.0.jar
+bundles.0.symbolic_name=com.solidsense.kura.sink;singleton\:\=true
+bundles.0.version=1.1.0
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=OpenVPNConfigurationService
+headers.version=1.3.1
+resources.count=0
