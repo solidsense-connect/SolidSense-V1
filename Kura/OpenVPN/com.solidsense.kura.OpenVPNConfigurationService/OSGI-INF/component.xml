@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="com.solidsense.kura.WirepasConfigurationService">
-   <implementation class="com.solidsense.kura.WirepasConfigurationService"/>
-   <property name="service.pid" type="String" value="com.solidsense.kura.WirepasConfigurationService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="com.solidsense.kura.OpenVPNConfigurationService">
+   <implementation class="com.solidsense.kura.OpenVPNConfigurationService"/>
+   <property name="service.pid" type="String" value="com.solidsense.kura.OpenVPNConfigurationService"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static"/>
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static"/>
+
    
 </scr:component>
